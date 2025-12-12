@@ -3,39 +3,52 @@
 <head>
 <meta charset="UTF-8">
 <title>Helicopter Maintenance Dashboard</title>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background:#f4f6f9;
+body{
   margin:0;
+  font-family:Arial, sans-serif;
+  background:#f4f6f9;
 }
-header {
+header{
   background:#1e293b;
   color:white;
   padding:15px 20px;
 }
-.wrap { padding:20px; }
-.grid {
+header h1{ margin:0; }
+
+.container{ padding:20px; }
+
+.grid{
   display:grid;
   grid-template-columns: 1fr 1fr;
   gap:20px;
 }
-.card {
+
+.card{
   background:white;
   padding:15px;
   border-radius:8px;
   box-shadow:0 2px 6px rgba(0,0,0,.1);
 }
-h2 { margin-top:0; }
-label { font-weight:bold; display:block; margin-top:10px; }
-input, select {
+
+h2{ margin-top:0; }
+
+label{
+  font-weight:bold;
+  margin-top:10px;
+  display:block;
+}
+
+input, select{
   width:100%;
   padding:6px;
   margin-top:4px;
 }
-button {
+
+button{
   margin-top:15px;
   padding:10px 15px;
   background:#2563eb;
@@ -44,26 +57,30 @@ button {
   border-radius:6px;
   cursor:pointer;
 }
-button:hover { background:#1d4ed8; }
+button:hover{ background:#1d4ed8; }
 
-table {
+table{
   width:100%;
   border-collapse:collapse;
   margin-top:10px;
 }
-th, td {
+
+th, td{
   border:1px solid #ccc;
   padding:6px;
-  text-align:left;
 }
-th { background:#e5e7eb; }
 
-.done { color:green; font-weight:bold; }
-.notdone { color:red; font-weight:bold; }
-.badge {
+th{
+  background:#e5e7eb;
+}
+
+.done{ color:green; font-weight:bold; }
+.notdone{ color:red; font-weight:bold; }
+
+.badge{
   background:#16a34a;
   color:white;
-  padding:3px 6px;
+  padding:3px 8px;
   border-radius:6px;
   font-size:12px;
 }
@@ -76,13 +93,13 @@ th { background:#e5e7eb; }
   <h1><i class="fa-solid fa-helicopter"></i> Helicopter Maintenance Dashboard</h1>
 </header>
 
-<div class="wrap">
+<div class="container">
 
+<!-- ================= SETUP ================= -->
 <div class="grid">
 
-<!-- SETUP -->
 <div class="card">
-<h2>✈ Aircraft Setup</h2>
+<h2>✈ Aircraft & Package Setup</h2>
 
 <label>Aircraft Registration</label>
 <input id="reg">
@@ -101,7 +118,7 @@ th { background:#e5e7eb; }
   <option>4 YEAR</option>
 </select>
 
-<label>Section</label>
+<label>Section / Team</label>
 <select id="section">
   <option>Aircraft</option>
   <option>Engine RH</option>
@@ -109,29 +126,37 @@ th { background:#e5e7eb; }
   <option>Routine</option>
 </select>
 
+<label>Task Description</label>
+<input id="taskText" placeholder="e.g. 300 HRS Insp / Replace M/R Head">
+
 <button onclick="addTask()">➕ Add Task</button>
 </div>
 
-<!-- TASK ENTRY -->
+<!-- ================= TASKS ================= -->
 <div class="card">
 <h2>🛠 Tasks</h2>
-<input id="taskText" placeholder="Task description">
-<button onclick="markDone()">✔ Mark Selected Done</button>
 
 <table>
 <thead>
-<tr><th>#</th><th>Task</th><th>Status</th><th>NRC</th></tr>
+<tr>
+  <th>#</th>
+  <th>Task</th>
+  <th>Section</th>
+  <th>Status</th>
+  <th>NRC</th>
+</tr>
 </thead>
 <tbody id="taskBody"></tbody>
 </table>
+
+<button onclick="markLastDone()">✔ Mark Last Task Done</button>
 </div>
 
 </div>
 
-<!-- CONTROL PANEL -->
+<!-- ================= CONTROL ================= -->
 <div class="grid">
 
-<!-- PARTS CONTROL -->
 <div class="card">
 <h2>📦 Parts Control</h2>
 <p>AOG: <span class="badge">GOOD</span></p>
@@ -139,12 +164,15 @@ th { background:#e5e7eb; }
 <p>Available: <span class="badge">GOOD</span></p>
 </div>
 
-<!-- TALLY SHEET -->
 <div class="card">
 <h2>📋 Tally Sheet</h2>
 <table>
 <thead>
-<tr><th>Item</th><th>Description</th><th>Status</th></tr>
+<tr>
+  <th>Item</th>
+  <th>Description</th>
+  <th>Status</th>
+</tr>
 </thead>
 <tbody id="tallyBody"></tbody>
 </table>
@@ -155,77 +183,74 @@ th { background:#e5e7eb; }
 </div>
 
 <script>
-let tasks = [];
-let nonRoutineCards = [];
+let tasks=[];
+let nonRoutine=[];
 
-function addTask() {
-  const text = document.getElementById("taskText").value;
-  if (!text) return;
+function addTask(){
+  const text=taskText.value;
+  if(!text) return;
 
   tasks.push({
-    text,
-    completed:false,
-    inspection: inspection.value,
-    section: section.value,
-    nrc:null
+    text:text,
+    section:section.value,
+    inspection:inspection.value,
+    done:false,
+    nrc:""
   });
-  document.getElementById("taskText").value="";
-  renderTasks();
+
+  taskText.value="";
+  render();
 }
 
-function markDone() {
-  if (tasks.length === 0) return;
-  tasks[tasks.length-1].completed = true;
-  renderTasks();
+function markLastDone(){
+  if(tasks.length===0) return;
+  tasks[tasks.length-1].done=true;
+  render();
 }
 
-function renderTasks() {
-  const body = document.getElementById("taskBody");
+function addNRC(i,val){
+  if(!val) return;
+  tasks[i].nrc=val;
+  nonRoutine.push({ nrc:val, text:tasks[i].text });
+  render();
+}
+
+function render(){
+  const body=document.getElementById("taskBody");
   body.innerHTML="";
   tasks.forEach((t,i)=>{
     body.innerHTML+=`
     <tr>
       <td>${i+1}</td>
       <td>${t.text}</td>
-      <td class="${t.completed?'done':'notdone'}">
-        ${t.completed?'✔ Done':'❌'}
+      <td>${t.section}</td>
+      <td class="${t.done?'done':'notdone'}">
+        ${t.done?'✔ Done':'❌'}
       </td>
       <td>
         <input placeholder="NRC#" onchange="addNRC(${i},this.value)">
       </td>
     </tr>`;
   });
-  renderTally();
-}
 
-function addNRC(i,val){
-  if(!val) return;
-  nonRoutineCards.push({
-    nrc:val,
-    task:tasks[i].text
-  });
-  renderTally();
-}
-
-function renderTally(){
-  const body=document.getElementById("tallyBody");
-  body.innerHTML="";
+  const tally=document.getElementById("tallyBody");
+  tally.innerHTML="";
   let n=1;
 
   tasks.forEach(t=>{
-    body.innerHTML+=`
+    tally.innerHTML+=`
     <tr>
       <td>${n++}</td>
       <td>${t.text}</td>
-      <td>${t.completed?'✔':'❌'}</td>
+      <td>${t.done?'✔':'❌'}</td>
     </tr>`;
   });
 
-  nonRoutineCards.forEach(nr=>{
-    body.innerHTML+=`
+  nonRoutine.forEach(nr=>{
+    tally.innerHTML+=`
     <tr>
       <td>${n++}</td>
-      <td>NRC ${nr.nrc} – ${nr.task}</td>
+      <td>NRC ${nr.nrc} – ${nr.text}</td>
       <td>❌</td>
     </tr>`;
   });
