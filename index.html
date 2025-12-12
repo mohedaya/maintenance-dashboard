@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Helicopter Maintenance Dashboard</title>
+<title>Helicopter Maintenance Control</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
@@ -17,8 +17,6 @@ header{
   color:white;
   padding:15px 20px;
 }
-header h1{ margin:0; }
-
 .container{ padding:20px; }
 
 .grid{
@@ -35,12 +33,7 @@ header h1{ margin:0; }
 }
 
 h2{ margin-top:0; }
-
-label{
-  font-weight:bold;
-  margin-top:10px;
-  display:block;
-}
+label{ font-weight:bold; display:block; margin-top:10px; }
 
 input, select{
   width:100%;
@@ -64,15 +57,11 @@ table{
   border-collapse:collapse;
   margin-top:10px;
 }
-
 th, td{
   border:1px solid #ccc;
   padding:6px;
 }
-
-th{
-  background:#e5e7eb;
-}
+th{ background:#e5e7eb; }
 
 .done{ color:green; font-weight:bold; }
 .notdone{ color:red; font-weight:bold; }
@@ -90,23 +79,43 @@ th{
 <body>
 
 <header>
-  <h1><i class="fa-solid fa-helicopter"></i> Helicopter Maintenance Dashboard</h1>
+  <h1><i class="fa-solid fa-helicopter"></i> Helicopter Maintenance Control</h1>
 </header>
 
 <div class="container">
 
-<!-- ================= SETUP ================= -->
-<div class="grid">
-
+<!-- ================= DATA ENTRY ================= -->
 <div class="card">
-<h2>✈ Aircraft & Package Setup</h2>
+<h2>📌 Aircraft Data & Planning</h2>
 
-<label>Aircraft Registration</label>
-<input id="reg">
+<div class="grid">
+<div>
+  <label>Aircraft Registration</label>
+  <input id="reg">
 
-<label>Inspection Package</label>
-<select id="inspection">
-  <option value="">-- Select --</option>
+  <label>Serial Number (S/N)</label>
+  <input id="sn">
+
+  <label>Total Time (TT)</label>
+  <input id="tt">
+
+  <label>Total Cycles (TC)</label>
+  <input id="tc">
+</div>
+
+<div>
+  <label>Planned Consumables Order</label>
+  <input placeholder="Oil, filters, O-rings…">
+</div>
+</div>
+</div>
+
+<!-- ================= PACKAGE SELECTION ================= -->
+<div class="card">
+<h2>📦 Inspection Packages (Planning)</h2>
+
+<label>Select required inspections</label>
+<select id="inspectionSelect" multiple>
   <option>50 HRS</option>
   <option>100 HRS</option>
   <option>300 HRS</option>
@@ -118,6 +127,25 @@ th{
   <option>4 YEAR</option>
 </select>
 
+<button onclick="addInspections()">➕ Add Inspections to Tally</button>
+</div>
+
+<!-- ================= TASK ENTRY ================= -->
+<div class="grid">
+
+<div class="card">
+<h2>🛠 Add Task</h2>
+
+<label>Task Title</label>
+<input id="taskTitle">
+
+<label>Task Type</label>
+<select id="taskType">
+  <option>Inspection</option>
+  <option>Routine</option>
+  <option>Non-Routine</option>
+</select>
+
 <label>Section / Team</label>
 <select id="section">
   <option>Aircraft</option>
@@ -126,35 +154,34 @@ th{
   <option>Routine</option>
 </select>
 
-<label>Task Description</label>
-<input id="taskText" placeholder="e.g. 300 HRS Insp / Replace M/R Head">
+<label>NRC # (only for Non-Routine)</label>
+<input id="nrc">
 
 <button onclick="addTask()">➕ Add Task</button>
 </div>
 
-<!-- ================= TASKS ================= -->
 <div class="card">
 <h2>🛠 Tasks</h2>
 
 <table>
 <thead>
 <tr>
-  <th>#</th>
-  <th>Task</th>
-  <th>Section</th>
-  <th>Status</th>
-  <th>NRC</th>
+<th>#</th>
+<th>Task Title</th>
+<th>Type</th>
+<th>Section</th>
+<th>Status</th>
 </tr>
 </thead>
 <tbody id="taskBody"></tbody>
 </table>
 
-<button onclick="markLastDone()">✔ Mark Last Task Done</button>
+<button onclick="markDone()">✔ Mark Last Task Done</button>
 </div>
 
 </div>
 
-<!-- ================= CONTROL ================= -->
+<!-- ================= CONTROL PANEL ================= -->
 <div class="grid">
 
 <div class="card">
@@ -169,9 +196,9 @@ th{
 <table>
 <thead>
 <tr>
-  <th>Item</th>
-  <th>Description</th>
-  <th>Status</th>
+<th>Item</th>
+<th>Reference</th>
+<th>Status</th>
 </tr>
 </thead>
 <tbody id="tallyBody"></tbody>
@@ -183,52 +210,51 @@ th{
 </div>
 
 <script>
+let inspections=[];
 let tasks=[];
-let nonRoutine=[];
 
-function addTask(){
-  const text=taskText.value;
-  if(!text) return;
-
-  tasks.push({
-    text:text,
-    section:section.value,
-    inspection:inspection.value,
-    done:false,
-    nrc:""
+function addInspections(){
+  const sel=document.getElementById("inspectionSelect");
+  [...sel.selectedOptions].forEach(o=>{
+    inspections.push({ name:o.value, done:false });
   });
-
-  taskText.value="";
   render();
 }
 
-function markLastDone(){
+function addTask(){
+  if(!taskTitle.value) return;
+
+  tasks.push({
+    title:taskTitle.value,
+    type:taskType.value,
+    section:section.value,
+    nrc:nrc.value,
+    done:false
+  });
+
+  taskTitle.value="";
+  nrc.value="";
+  render();
+}
+
+function markDone(){
   if(tasks.length===0) return;
   tasks[tasks.length-1].done=true;
   render();
 }
 
-function addNRC(i,val){
-  if(!val) return;
-  tasks[i].nrc=val;
-  nonRoutine.push({ nrc:val, text:tasks[i].text });
-  render();
-}
-
 function render(){
-  const body=document.getElementById("taskBody");
-  body.innerHTML="";
+  const tb=document.getElementById("taskBody");
+  tb.innerHTML="";
   tasks.forEach((t,i)=>{
-    body.innerHTML+=`
+    tb.innerHTML+=`
     <tr>
       <td>${i+1}</td>
-      <td>${t.text}</td>
+      <td>${t.title}</td>
+      <td>${t.type}</td>
       <td>${t.section}</td>
       <td class="${t.done?'done':'notdone'}">
-        ${t.done?'✔ Done':'❌'}
-      </td>
-      <td>
-        <input placeholder="NRC#" onchange="addNRC(${i},this.value)">
+        ${t.done?'✔':'❌'}
       </td>
     </tr>`;
   });
@@ -237,21 +263,21 @@ function render(){
   tally.innerHTML="";
   let n=1;
 
+  inspections.forEach(i=>{
+    tally.innerHTML+=`
+    <tr>
+      <td>${n++}</td>
+      <td>${i.name} Inspection</td>
+      <td>${i.done?'✔':'❌'}</td>
+    </tr>`;
+  });
+
   tasks.forEach(t=>{
     tally.innerHTML+=`
     <tr>
       <td>${n++}</td>
-      <td>${t.text}</td>
+      <td>${t.type==="Non-Routine" ? "NRC "+t.nrc+" – ":""}${t.title}</td>
       <td>${t.done?'✔':'❌'}</td>
-    </tr>`;
-  });
-
-  nonRoutine.forEach(nr=>{
-    tally.innerHTML+=`
-    <tr>
-      <td>${n++}</td>
-      <td>NRC ${nr.nrc} – ${nr.text}</td>
-      <td>❌</td>
     </tr>`;
   });
 }
