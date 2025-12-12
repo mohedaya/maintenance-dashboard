@@ -22,31 +22,28 @@
   <button onclick="startWork()">Start Work Package</button>
 
   <h3>Selected Work Package</h3>
-  <pre id="output"></pre>
+<div id="output">
+  <h3>Progress</h3>
+  <div style="width:300px; background:#ddd;">
+    <div id="bar" style="width:0%; background:green; color:white; padding:5px;">0%</div>
+  </div>
+  <br>
+  <button onclick="addProgress()">+10%</button>
+</div>
 
-   <script>
-  function startWork() {
-    const aircraft = document.getElementById("aircraft").value;
-    const packages = [];
+<script>
+let progress = 0;
 
-    document.querySelectorAll('input[type="checkbox"]:checked')
-      .forEach(cb => {
-        packages.push({
-          name: cb.value,
-          progress: 0
-        });
-      });
-
-    const workPackage = {
-      aircraft: aircraft,
-      packages: packages,
-      status: "In Progress"
-    };
-
-    document.getElementById("output").textContent =
-      JSON.stringify(workPackage, null, 2);
+function addProgress() {
+  if (progress < 100) {
+    progress += 10;
+    document.getElementById("bar").style.width = progress + "%";
+    document.getElementById("bar").innerText = progress + "%";
   }
+}
 </script>
+
+  
 
 </body>
 </html>
