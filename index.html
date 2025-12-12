@@ -1,42 +1,185 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Helicopter Maintenance Dashboard</title>
+
+  <!-- Font & Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .packages {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .packages label {
+      background: #eef2f6;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button {
+      background: #0066cc;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #004c99;
+    }
+
+    hr {
+      margin: 25px 0;
+    }
+
+    .progress-box {
+      margin-top: 20px;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      background: #ddd;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      width: 0%;
+      background: #28a745;
+      color: white;
+      text-align: center;
+      padding: 8px 0;
+      transition: 0.3s;
+    }
+
+    .card {
+      background: #f9fbfd;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    pre {
+      background: #111;
+      color: #0f0;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+
+    .footer {
+      text-align: center;
+      color: #777;
+      margin-top: 30px;
+      font-size: 14px;
+    }
+  </style>
 </head>
 
 <body>
 
-<h1>Helicopter Maintenance Dashboard</h1>
+<div class="container">
 
-<label>Aircraft Registration:</label><br>
-<input type="text" id="aircraft" placeholder="e.g. N85AH"><br><br>
+  <h1><i class="fa-solid fa-helicopter"></i> Maintenance Dashboard</h1>
 
-<h3>Select Maintenance Packages:</h3>
+  <label>Aircraft Registration</label>
+  <input type="text" id="aircraft" placeholder="Example: HZ-ABC">
 
-<label><input type="checkbox" value="300HR Aircraft"> 300 HR Aircraft</label><br>
-<label><input type="checkbox" value="600HR Aircraft"> 600 HR Aircraft</label><br>
-<label><input type="checkbox" value="300HR Engine"> 300 HR Engine</label><br>
-<label><input type="checkbox" value="600HR Engine"> 600 HR Engine</label><br>
-<label><input type="checkbox" value="Routine Task Cards"> Routine Task Cards</label><br><br>
+  <label>Select Maintenance Packages</label>
 
-<button onclick="startPackage()">Start Work Package</button>
+  <div class="packages">
+    <label><input type="checkbox" value="300 HR Aircraft"> 300 HR Aircraft</label>
+    <label><input type="checkbox" value="600 HR Aircraft"> 600 HR Aircraft</label>
+    <label><input type="checkbox" value="300 HR Engine"> 300 HR Engine</label>
+    <label><input type="checkbox" value="600 HR Engine"> 600 HR Engine</label>
+    <label><input type="checkbox" value="Routine Task Cards"> Routine Task Cards</label>
+  </div>
 
-<hr>
+  <button onclick="startPackage()">
+    <i class="fa-solid fa-play"></i> Start Work Package
+  </button>
 
-<h3>Selected Work Package</h3>
-<div id="packageOutput"></div>
+  <hr>
 
-<hr>
+  <div class="card">
+    <h3><i class="fa-solid fa-clipboard-list"></i> Work Package Data</h3>
+    <div id="packageOutput"></div>
+  </div>
 
-<h3>Progress</h3>
-<div style="width:300px; background:#ddd;">
-  <div id="bar" style="width:0%; background:green; color:white; padding:5px;">0%</div>
+  <div class="progress-box">
+    <h3><i class="fa-solid fa-chart-line"></i> Progress</h3>
+
+    <div class="progress-bar-bg">
+      <div id="bar" class="progress-bar">0%</div>
+    </div>
+
+    <br>
+    <button onclick="addProgress()">
+      <i class="fa-solid fa-plus"></i> +10%
+    </button>
+  </div>
+
 </div>
-<br>
-<button onclick="addProgress()">+10%</button>
+
+<div class="footer">
+  Helicopter Maintenance Dashboard • Prototype
+</div>
 
 <script>
 let progress = 0;
+
+window.onload = function () {
+  const saved = localStorage.getItem("workPackage");
+  if (saved) {
+    const data = JSON.parse(saved);
+    progress = data.progress || 0;
+    updateBar();
+    document.getElementById("packageOutput").innerHTML =
+      "<pre>" + JSON.stringify(data.package, null, 2) + "</pre>";
+  }
+};
 
 function startPackage() {
   const aircraft = document.getElementById("aircraft").value;
@@ -45,20 +188,38 @@ function startPackage() {
 
   checkboxes.forEach(cb => packages.push(cb.value));
 
+  const pkg = {
+    aircraft: aircraft,
+    packages: packages,
+    status: "In Progress"
+  };
+
+  localStorage.setItem("workPackage", JSON.stringify({
+    package: pkg,
+    progress: progress
+  }));
+
   document.getElementById("packageOutput").innerHTML =
-    "<pre>" + JSON.stringify({
-      aircraft: aircraft,
-      packages: packages,
-      status: "In Progress"
-    }, null, 2) + "</pre>";
+    "<pre>" + JSON.stringify(pkg, null, 2) + "</pre>";
 }
 
 function addProgress() {
   if (progress < 100) {
     progress += 10;
-    document.getElementById("bar").style.width = progress + "%";
-    document.getElementById("bar").innerText = progress + "%";
+    updateBar();
+
+    const saved = JSON.parse(localStorage.getItem("workPackage"));
+    if (saved) {
+      saved.progress = progress;
+      localStorage.setItem("workPackage", JSON.stringify(saved));
+    }
   }
+}
+
+function updateBar() {
+  const bar = document.getElementById("bar");
+  bar.style.width = progress + "%";
+  bar.innerText = progress + "%";
 }
 </script>
 
