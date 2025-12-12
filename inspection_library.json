@@ -31,4 +31,26 @@
       }
     }
   }
-}
+,
+"routine_tasks": [
+  {
+    "id": "RT-ENG-01",
+    "section": "Engine",
+    "title": "General lubrication"
+  },
+  {
+    "id": "RT-AIR-01",
+    "section": "Fuselage / Airframe",
+    "title": "Cleaning and servicing"
+  },
+  {
+    "id": "RT-MR-01",
+    "section": "Main Rotor & MGB",
+    "title": "MR head lubrication"
+  },
+  {
+    "id": "RT-AV-01",
+    "section": "Avionics & Electrical",
+    "title": "Operational check"
+  }
+]}
