@@ -13,6 +13,18 @@
   ],
 
   "aircraft_inspections": {
+    "50 HRS": {
+      "revision": "Rev A",
+      "sections": {
+        "Engine": [
+          { "id": "50-ENG-01", "title": "General engine visual inspection" }
+        ],
+        "Fuselage / Airframe": [
+          { "id": "50-AIR-01", "title": "General airframe walk-around" }
+        ]
+      }
+    },
+
     "100 HRS": {
       "revision": "Rev A",
       "sections": {
@@ -33,6 +45,82 @@
           { "id": "100-AV-01", "title": "Avionics operational check" }
         ]
       }
+    },
+
+    "300 HRS": {
+      "revision": "Rev A",
+      "sections": {
+        "Engine": [
+          { "id": "300-ENG-01", "title": "Inspect engine mounts" }
+        ],
+        "Main Rotor & MGB": [
+          { "id": "300-MR-01", "title": "Check MR blade attachment bolts" }
+        ],
+        "Tail Rotor & Drive": [
+          { "id": "300-TR-01", "title": "Inspect tail rotor pitch links" }
+        ]
+      }
+    },
+
+    "600 HRS": {
+      "revision": "Rev A",
+      "sections": {
+        "Engine": [
+          { "id": "600-ENG-01", "title": "Inspect engine fuel system" }
+        ],
+        "Fuselage / Airframe": [
+          { "id": "600-AIR-01", "title": "Inspect landing gear condition" }
+        ],
+        "Avionics & Electrical": [
+          { "id": "600-AV-01", "title": "Electrical bonding check" }
+        ]
+      }
+    },
+
+    "1 YEAR": {
+      "revision": "Rev A",
+      "sections": {
+        "Fuselage / Airframe": [
+          { "id": "1Y-AIR-01", "title": "Detailed fuselage inspection" }
+        ],
+        "Main Rotor & MGB": [
+          { "id": "1Y-MR-01", "title": "Detailed MR system inspection" }
+        ]
+      }
+    },
+
+    "2 YEAR": {
+      "revision": "Rev A",
+      "sections": {
+        "Tail Rotor & Drive": [
+          { "id": "2Y-TR-01", "title": "Detailed tail rotor inspection" }
+        ],
+        "Avionics & Electrical": [
+          { "id": "2Y-AV-01", "title": "Avionics detailed check" }
+        ]
+      }
+    },
+
+    "4 YEAR": {
+      "revision": "Rev A",
+      "sections": {
+        "Engine": [
+          { "id": "4Y-ENG-01", "title": "Inspect engine mounts" },
+          { "id": "4Y-ENG-02", "title": "Check oil lines and fittings" }
+        ],
+        "Main Rotor & MGB": [
+          { "id": "4Y-MR-01", "title": "Detailed MR head inspection" }
+        ],
+        "Tail Rotor & Drive": [
+          { "id": "4Y-TR-01", "title": "Inspect tail rotor gearbox" }
+        ],
+        "Fuselage / Airframe": [
+          { "id": "4Y-AIR-01", "title": "Detailed fuselage inspection" }
+        ],
+        "Avionics & Electrical": [
+          { "id": "4Y-AV-01", "title": "Complete avionics functional test" }
+        ]
+      }
     }
   },
 
@@ -41,8 +129,7 @@
       "revision": "Rev A",
       "tasks": [
         { "id": "ENG300-01", "title": "Fuel nozzle inspection" },
-        { "id": "ENG300-02", "title": "Oil filter inspection" },
-        { "id": "ENG300-03", "title": "Check engine external leaks" }
+        { "id": "ENG300-02", "title": "Oil filter inspection" }
       ]
     },
 
@@ -50,16 +137,14 @@
       "revision": "Rev A",
       "tasks": [
         { "id": "ENG600-01", "title": "Engine performance check" },
-        { "id": "ENG600-02", "title": "FCU inspection" },
-        { "id": "ENG600-03", "title": "Check engine mounts" }
+        { "id": "ENG600-02", "title": "FCU inspection" }
       ]
     },
 
     "900 HRS ENG": {
       "revision": "Rev A",
       "tasks": [
-        { "id": "ENG900-01", "title": "Borescope inspection" },
-        { "id": "ENG900-02", "title": "Check compressor condition" }
+        { "id": "ENG900-01", "title": "Borescope inspection" }
       ]
     }
   },
