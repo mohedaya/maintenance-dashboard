@@ -24,24 +24,29 @@
   <h3>Selected Work Package</h3>
   <pre id="output"></pre>
 
-  <script>
-    function startWork() {
-      const aircraft = document.getElementById("aircraft").value;
-      const packages = [];
+   <script>
+  function startWork() {
+    const aircraft = document.getElementById("aircraft").value;
+    const packages = [];
 
-      document.querySelectorAll('input[type="checkbox"]:checked')
-        .forEach(cb => packages.push(cb.value));
+    document.querySelectorAll('input[type="checkbox"]:checked')
+      .forEach(cb => {
+        packages.push({
+          name: cb.value,
+          progress: 0
+        });
+      });
 
-      const workPackage = {
-        aircraft: aircraft,
-        packages: packages,
-        status: "In Progress"
-      };
+    const workPackage = {
+      aircraft: aircraft,
+      packages: packages,
+      status: "In Progress"
+    };
 
-      document.getElementById("output").textContent =
-        JSON.stringify(workPackage, null, 2);
-    }
-  </script>
+    document.getElementById("output").textContent =
+      JSON.stringify(workPackage, null, 2);
+  }
+</script>
 
 </body>
 </html>
