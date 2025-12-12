@@ -1,226 +1,407 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Helicopter Maintenance Dashboard</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-body{ margin:0; font-family:Arial, sans-serif; background:#f4f6f9; }
-.hidden{ display:none; }
+  :root{
+    --bg:#f4f6f9;
+    --card:#ffffff;
+    --ink:#0f172a;
+    --muted:#64748b;
+    --line:#cbd5e1;
+    --brand:#2563eb;
+    --brand2:#1d4ed8;
+    --ok:#16a34a;
+    --warn:#f59e0b;
+    --bad:#dc2626;
+    --panel:#0b1220;
+  }
+  body{ margin:0; font-family: Arial, sans-serif; background:var(--bg); color:var(--ink); }
+  .hidden{ display:none; }
 
-header{
-  background:#1e293b;
-  color:white;
-  padding:12px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  flex-wrap:wrap;
-}
-header small{ color:#cbd5e1; }
+  header{
+    background:#1e293b; color:#fff;
+    padding:12px 16px;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; flex-wrap:wrap;
+  }
+  header .left{ display:flex; align-items:center; gap:10px; }
+  header .meta{ color:#cbd5e1; font-size:12px; }
+  header .chips{ display:flex; gap:6px; flex-wrap:wrap; }
+  .chip{
+    background:#334155; color:#e2e8f0;
+    font-size:12px; padding:4px 8px; border-radius:999px;
+    border:1px solid rgba(255,255,255,.12);
+  }
 
-.container{ padding:20px; }
+  .container{ padding:18px; }
 
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:20px;
-}
-@media (max-width:900px){
-  .grid{ grid-template-columns:1fr; }
-}
+  .grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+  @media (max-width: 980px){ .grid{ grid-template-columns:1fr; } }
 
-.card{
-  background:white;
-  padding:15px;
-  border-radius:8px;
-  box-shadow:0 2px 6px rgba(0,0,0,.1);
-}
+  .card{
+    background:var(--card);
+    border-radius:10px;
+    box-shadow:0 2px 6px rgba(0,0,0,.08);
+    padding:14px;
+  }
+  .card h2{ margin:0 0 10px 0; font-size:16px; }
 
-h2{ margin-top:0; }
-label{ font-weight:bold; display:block; margin-top:10px; }
-input, textarea{ width:100%; padding:6px; margin-top:4px; box-sizing:border-box; }
+  label{ font-weight:bold; display:block; margin-top:10px; font-size:13px; }
+  input, textarea, select{
+    width:100%; box-sizing:border-box;
+    padding:8px; margin-top:6px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:#fff;
+  }
+  textarea{ min-height:72px; resize:vertical; }
 
-button{
-  margin-top:15px;
-  padding:10px 15px;
-  background:#2563eb;
-  color:white;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-}
-button:hover{ background:#1d4ed8; }
+  .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .row > * { flex: 1 1 180px; }
 
-table{ width:100%; border-collapse:collapse; margin-top:10px; }
-th, td{ border:1px solid #ccc; padding:6px; }
-th{ background:#e5e7eb; }
+  button{
+    margin-top:12px;
+    padding:10px 12px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    background:var(--brand);
+    color:#fff;
+    font-weight:bold;
+  }
+  button:hover{ background:var(--brand2); }
+  button:disabled{ opacity:.55; cursor:not-allowed; }
 
-.done{ color:green; font-weight:bold; }
-.notdone{ color:red; font-weight:bold; }
+  .notice{
+    background:#fff7ed;
+    border:1px solid #fed7aa;
+    color:#7c2d12;
+    padding:10px;
+    border-radius:10px;
+    font-size:13px;
+  }
+  .small{ font-size:12px; color:var(--muted); }
 
-.badge{
-  background:#16a34a;
-  color:white;
-  padding:3px 8px;
-  border-radius:6px;
-  font-size:12px;
-}
+  .tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+  .tab{
+    border:1px solid var(--line);
+    background:#fff;
+    color:var(--ink);
+    padding:6px 10px;
+    border-radius:999px;
+    font-size:12px;
+    cursor:pointer;
+  }
+  .tab.active{
+    background:#e0e7ff;
+    border-color:#a5b4fc;
+    color:#1e3a8a;
+    font-weight:bold;
+  }
 
-.warn{
-  background:#fff7ed;
-  border:1px solid #fed7aa;
-  padding:10px;
-  border-radius:8px;
-  color:#7c2d12;
-}
-.small{ font-size:12px; color:#64748b; }
+  table{ width:100%; border-collapse:collapse; }
+  th, td{ border:1px solid var(--line); padding:8px; font-size:13px; vertical-align:top; }
+  th{ background:#e5e7eb; text-align:left; }
+  .status{
+    display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; font-weight:bold;
+    border:1px solid rgba(0,0,0,.08);
+  }
+  .s-ok{ background:#dcfce7; color:#166534; }
+  .s-open{ background:#fee2e2; color:#991b1b; }
+  .s-mid{ background:#ffedd5; color:#9a3412; }
+
+  .clickRow{ cursor:pointer; }
+  .clickRow:hover{ background:#f1f5f9; }
+
+  .layoutMain{
+    display:grid;
+    grid-template-columns: 1.15fr .85fr;
+    gap:16px;
+    align-items:start;
+  }
+  @media (max-width: 1100px){
+    .layoutMain{ grid-template-columns:1fr; }
+  }
+
+  .progressBox p{ margin:8px 0; }
+  .bar{
+    height:10px; background:#e5e7eb; border-radius:999px; overflow:hidden;
+    margin-top:6px;
+  }
+  .bar > div{ height:100%; background:var(--brand); width:0%; }
+
+  /* Details panel */
+  .details{
+    border:1px solid var(--line);
+    border-radius:12px;
+    overflow:hidden;
+  }
+  .detailsHead{
+    background:#0f172a;
+    color:#fff;
+    padding:12px;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .detailsHead .title{ font-weight:bold; }
+  .detailsHead .meta{ font-size:12px; color:#cbd5e1; margin-top:4px; }
+  .detailsBody{ background:#fff; padding:12px; }
+  .groupTitle{
+    font-weight:bold; margin:12px 0 6px 0; color:#0f172a;
+    display:flex; align-items:center; gap:8px;
+  }
+  .taskItem{
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px;
+    margin-bottom:8px;
+    background:#fff;
+  }
+  .taskTop{
+    display:flex; gap:10px; align-items:flex-start; justify-content:space-between; flex-wrap:wrap;
+  }
+  .taskTop .name{ font-weight:bold; }
+  .taskTop .sub{ color:var(--muted); font-size:12px; margin-top:4px; }
+  .taskControls{
+    display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px;
+  }
+  .pill{
+    font-size:12px;
+    padding:2px 8px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:#f8fafc;
+    color:#0f172a;
+  }
+  .inline{
+    display:inline-flex; gap:8px; align-items:center; flex-wrap:wrap;
+  }
+  .miniInput{
+    width:140px; max-width:100%;
+    padding:6px 8px;
+    border-radius:8px;
+    border:1px solid var(--line);
+  }
+  .btnSmall{
+    padding:7px 10px;
+    border-radius:10px;
+    background:#0f172a;
+    color:#fff;
+    border:none;
+    cursor:pointer;
+    font-weight:bold;
+    font-size:12px;
+    margin-top:0;
+  }
+  .btnSmall:hover{ background:#111c33; }
+  .btnGhost{
+    background:#fff;
+    color:#0f172a;
+    border:1px solid var(--line);
+  }
+  .btnGhost:hover{ background:#f1f5f9; }
 </style>
 </head>
 
 <body>
 
-<!-- ================= TOP BAR ================= -->
+<!-- TOP BAR (Main page only) -->
 <header id="topBar" class="hidden">
-  <div>
-    <b id="tbReg">—</b>
-    <small>
-      | TT: <span id="tbTT">—</span>
-      | TC: <span id="tbTC">—</span>
-      | S/N: <span id="tbSN">—</span>
-    </small>
+  <div class="left">
+    <i class="fa-solid fa-helicopter"></i>
+    <div>
+      <div><b id="tbReg">—</b></div>
+      <div class="meta">S/N: <span id="tbSN">—</span> | TT: <span id="tbTT">—</span> | TC: <span id="tbTC">—</span></div>
+    </div>
   </div>
-  <div>
-    <small>Inspections:</small>
-    <span id="tbInsp" class="small">—</span>
-  </div>
+  <div class="chips" id="tbChips"></div>
 </header>
 
-<!-- ================= PAGE 1 : SETUP ================= -->
+<!-- PAGE 1: DATA ENTRY / PLANNING -->
 <div id="pageSetup" class="container">
+  <div class="card">
+    <h2>📌 Data Entry & Planning</h2>
 
-<div class="card">
-<h2>📌 Aircraft Data & Planning</h2>
+    <div class="grid">
+      <div>
+        <label>Aircraft Registration</label>
+        <input id="reg" placeholder="e.g. HZ-XXX" />
 
-<div class="grid">
-<div>
-  <label>Aircraft Registration</label>
-  <input id="reg">
+        <label>Serial Number (S/N)</label>
+        <input id="sn" placeholder="e.g. 31-xxxx" />
 
-  <label>Serial Number (S/N)</label>
-  <input id="sn">
+        <div class="row">
+          <div>
+            <label>Total Time (TT)</label>
+            <input id="tt" placeholder="e.g. 2450:30" />
+          </div>
+          <div>
+            <label>Total Cycles (TC)</label>
+            <input id="tc" placeholder="e.g. 3980" />
+          </div>
+        </div>
 
-  <label>Total Time (TT)</label>
-  <input id="tt">
+        <label>Planned Consumables Order</label>
+        <textarea id="consumables" placeholder="Oil, filters, O-rings, seals…"></textarea>
+      </div>
 
-  <label>Total Cycles (TC)</label>
-  <input id="tc">
+      <div>
+        <label>Required Aircraft Inspections (Planning)</label>
+        <div class="small">Select only what Planning assigned for this aircraft.</div>
+
+        <div style="margin-top:8px;">
+          <label><input type="checkbox" value="50 HRS" class="cbAir"> 50 HRS</label>
+          <label><input type="checkbox" value="100 HRS" class="cbAir"> 100 HRS</label>
+          <label><input type="checkbox" value="300 HRS" class="cbAir"> 300 HRS</label>
+          <label><input type="checkbox" value="600 HRS" class="cbAir"> 600 HRS</label>
+          <label><input type="checkbox" value="1200 HRS" class="cbAir"> 1200 HRS</label>
+          <label><input type="checkbox" value="2400 HRS" class="cbAir"> 2400 HRS</label>
+          <label><input type="checkbox" value="1 YEAR" class="cbAir"> 1 YEAR</label>
+          <label><input type="checkbox" value="2 YEAR" class="cbAir"> 2 YEAR</label>
+          <label><input type="checkbox" value="4 YEAR" class="cbAir"> 4 YEAR</label>
+        </div>
+
+        <label style="margin-top:12px;">
+          <input type="checkbox" id="includeRoutine">
+          Include Routine Tasks (from library)
+        </label>
+
+        <label style="margin-top:14px;">Engine Events (Planning)</label>
+        <div class="small">Select event(s) and engine side(s). Each selected event becomes one row per engine in Summary.</div>
+
+        <div style="margin-top:8px;">
+          <label><input type="checkbox" value="300 HRS Fuel Nozzles Change" class="cbEngEvt"> 300 HRS – Fuel Nozzles Change</label>
+          <label><input type="checkbox" value="600 HRS Fuel Nozzles Change" class="cbEngEvt"> 600 HRS – Fuel Nozzles Change</label>
+          <label><input type="checkbox" value="600 HRS Engine Inspection" class="cbEngEvt"> 600 HRS – Engine Inspection</label>
+          <label><input type="checkbox" value="900 HRS Engine Inspection" class="cbEngEvt"> 900 HRS – Engine Inspection</label>
+        </div>
+
+        <div class="row" style="margin-top:8px;">
+          <label style="margin:0;"><input type="checkbox" id="engRH"> Engine RH</label>
+          <label style="margin:0;"><input type="checkbox" id="engLH"> Engine LH</label>
+        </div>
+      </div>
+    </div>
+
+    <div id="libStatus" class="notice" style="margin-top:12px;">
+      Library status: <b>Loading…</b>
+      <div class="small">Make sure <b>inspection_library.json</b> is in the same GitHub repo folder as <b>index.html</b>.</div>
+    </div>
+
+    <button id="btnStart" disabled onclick="startMaintenance()">
+      ▶ Start Maintenance
+    </button>
+  </div>
 </div>
 
-<div>
-  <label>Required Inspections (Planning)</label>
-  <label><input type="checkbox" value="50 HRS"> 50 HRS</label>
-  <label><input type="checkbox" value="100 HRS"> 100 HRS</label>
-  <label><input type="checkbox" value="300 HRS"> 300 HRS</label>
-  <label><input type="checkbox" value="600 HRS"> 600 HRS</label>
-  <label><input type="checkbox" value="1200 HRS"> 1200 HRS</label>
-  <label><input type="checkbox" value="2400 HRS"> 2400 HRS</label>
-  <label><input type="checkbox" value="1 YEAR"> 1 YEAR</label>
-  <label><input type="checkbox" value="2 YEAR"> 2 YEAR</label>
-  <label><input type="checkbox" value="4 YEAR"> 4 YEAR</label>
-
-  <label style="margin-top:10px;">
-    <input type="checkbox" id="includeRoutine">
-    Include Routine Tasks
-  </label>
-</div>
-</div>
-
-<label>Planned Consumables Order</label>
-<textarea id="consumables" placeholder="Oil, filters, seals…"></textarea>
-
-<div id="libStatus" class="warn" style="margin-top:12px;">
-  Library status: <b>Loading…</b>
-</div>
-
-<button id="btnStart" onclick="startMaintenance()" disabled>
-▶ Start Maintenance
-</button>
-</div>
-
-</div>
-
-<!-- ================= PAGE 2 : MAIN CONTROL ================= -->
+<!-- PAGE 2: MAIN CONTROL -->
 <div id="pageMain" class="container hidden">
 
-<div class="grid">
-  <div class="card">
-    <h2>📊 Inspection Progress</h2>
-    <div id="inspectionProgress" class="small"></div>
+  <div class="layoutMain">
+
+    <!-- LEFT: Summary + Progress -->
+    <div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>📊 Inspection Progress</h2>
+          <div id="inspectionProgress" class="progressBox"></div>
+        </div>
+        <div class="card">
+          <h2>👥 Team Progress (5 Sections)</h2>
+          <div id="teamProgress" class="progressBox"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <h2>🧾 Control Panel (Summary)</h2>
+
+        <div class="tabs">
+          <div class="tab active" data-tab="air" onclick="setTab('air')">Aircraft Inspections</div>
+          <div class="tab" data-tab="eng" onclick="setTab('eng')">Engine Events</div>
+          <div class="tab" data-tab="rtn" onclick="setTab('rtn')">Routine</div>
+          <div class="tab" data-tab="nrc" onclick="setTab('nrc')">Non-Routine (NRC)</div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width:52%;">Item</th>
+              <th style="width:18%;">Progress</th>
+              <th style="width:30%;">Status</th>
+            </tr>
+          </thead>
+          <tbody id="summaryBody"></tbody>
+        </table>
+
+        <div class="small" style="margin-top:10px;">
+          Click any row to open its subtasks (like the PDF form). Subtasks are hidden from this panel.
+        </div>
+
+        <div class="card" style="margin-top:14px; background:#f8fafc;">
+          <h2 style="font-size:14px; margin:0 0 10px 0;">➕ Add Manual Task (Routine or NRC)</h2>
+          <div class="row">
+            <div>
+              <label style="margin-top:0;">Task Title</label>
+              <input id="manualTitle" placeholder="e.g. Extra lubrication / Finding…" />
+            </div>
+            <div>
+              <label style="margin-top:0;">Type</label>
+              <select id="manualType">
+                <option>Routine</option>
+                <option>Non-Routine</option>
+              </select>
+            </div>
+            <div>
+              <label style="margin-top:0;">Team / Section</label>
+              <select id="manualSection"></select>
+            </div>
+            <div>
+              <label style="margin-top:0;">NRC # (if Non-Routine)</label>
+              <input id="manualNRC" placeholder="e.g. 50" />
+            </div>
+          </div>
+          <button class="btnSmall" onclick="addManualItem()">Add</button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- RIGHT: Details panel -->
+    <div class="details">
+      <div class="detailsHead">
+        <div>
+          <div class="title" id="detailsTitle">Select an item</div>
+          <div class="meta" id="detailsMeta">Click an inspection / routine / NRC row to view subtasks.</div>
+        </div>
+        <div class="inline">
+          <button class="btnSmall btnGhost" onclick="closeDetails()">Close</button>
+        </div>
+      </div>
+      <div class="detailsBody" id="detailsBody">
+        <div class="small">No item selected.</div>
+      </div>
+    </div>
+
   </div>
-
-  <div class="card">
-    <h2>👥 Section / Team Progress</h2>
-    <div id="sectionProgress" class="small"></div>
-  </div>
-</div>
-
-<div class="grid">
-  <div class="card">
-    <h2>🛠 Task Control</h2>
-
-    <input id="taskTitle" placeholder="Task title (manual add)">
-
-    <label>Section / Team</label>
-    <select id="section">
-      <option>Fuselage / Airframe</option>
-      <option>Main Rotor & MGB</option>
-      <option>Tail Rotor & Drive</option>
-      <option>Engine</option>
-      <option>Avionics & Electrical</option>
-    </select>
-
-    <label>Task Type</label>
-    <select id="taskType">
-      <option>Inspection</option>
-      <option>Routine</option>
-      <option>Non-Routine</option>
-    </select>
-
-    <label>NRC # (only if Non-Routine)</label>
-    <input id="nrc">
-
-    <button onclick="addTaskManual()">➕ Add Task</button>
-  </div>
-
-  <div class="card">
-    <h2>📋 Tally Sheet</h2>
-
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Reference</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="tallyBody"></tbody>
-    </table>
-
-    <button onclick="markLastDone()">✔ Mark Last Task Done</button>
-  </div>
-</div>
-
 </div>
 
 <script>
-let library=null;
-let inspections=[];
-let tasks=[];
+/* ======================
+   STATE
+====================== */
+let library = null;
 
-const SECTIONS=[
+const SECTIONS = [
   "Fuselage / Airframe",
   "Main Rotor & MGB",
   "Tail Rotor & Drive",
@@ -228,131 +409,511 @@ const SECTIONS=[
   "Avionics & Electrical"
 ];
 
+// Summary items shown in panel (top-level only)
+let items = []; // {id, category:'air'|'eng'|'rtn'|'nrc', label, meta, tasks: [taskIds], engineSide?}
+
+// Subtasks (hidden unless drill-down)
+let tasks = []; // {id, parentId, title, section, done, type:'Inspection'|'Routine'|'Non-Routine', sourceLabel, nrcNo?}
+
+// UI
+let activeTab = "air";
+let selectedItemId = null;
+
+/* ======================
+   LIBRARY LOADING
+====================== */
 async function loadLibrary(){
   try{
-    const r=await fetch("inspection_library.json",{cache:"no-store"});
-    library=await r.json();
-    libStatus.innerHTML="Library status: <b>Loaded ✅</b>";
-    btnStart.disabled=false;
-  }catch{
-    libStatus.innerHTML="Library status: <b>NOT FOUND ❌</b>";
+    const res = await fetch("inspection_library.json", { cache: "no-store" });
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    library = await res.json();
+    libStatus.innerHTML = `Library status: <b>Loaded ✅</b><div class="small">inspection_library.json is ready.</div>`;
+    btnStart.disabled = false;
+
+    // Fill manual section dropdown
+    manualSection.innerHTML = SECTIONS.map(s => `<option>${s}</option>`).join("");
+  }catch(e){
+    libStatus.innerHTML = `Library status: <b>NOT FOUND ❌</b>
+      <div class="small">Error: ${String(e.message || e)}</div>
+      <div class="small">Make sure <b>inspection_library.json</b> exists in the same repo folder as <b>index.html</b>.</div>`;
+    btnStart.disabled = true;
   }
 }
+loadLibrary();
 
+/* ======================
+   HELPERS
+====================== */
+function uid(prefix){
+  return prefix + "_" + Math.random().toString(36).slice(2, 10);
+}
+function pct(done, total){
+  if(!total) return 0;
+  return Math.round((done/total)*100);
+}
+function statusLabel(p){
+  if(p === 100) return `<span class="status s-ok">Done</span>`;
+  if(p === 0) return `<span class="status s-open">Open</span>`;
+  return `<span class="status s-mid">In progress</span>`;
+}
+function setTab(tab){
+  activeTab = tab;
+  document.querySelectorAll(".tab").forEach(t => {
+    t.classList.toggle("active", t.getAttribute("data-tab") === tab);
+  });
+  renderSummary();
+  closeDetails();
+}
+
+/* ======================
+   BUILD WORK PACKAGE
+====================== */
 function startMaintenance(){
-  inspections=[];
-  tasks=[];
+  if(!library){ alert("Library not loaded."); return; }
 
-  document.querySelectorAll('#pageSetup input[type=checkbox]:checked')
-    .forEach(c=>{
-      if(c.value) inspections.push(c.value);
+  // Top bar
+  tbReg.textContent = reg.value || "—";
+  tbSN.textContent  = sn.value  || "—";
+  tbTT.textContent  = tt.value  || "—";
+  tbTC.textContent  = tc.value  || "—";
+
+  // Chips
+  tbChips.innerHTML = "";
+  const chip = (text) => {
+    const d = document.createElement("div");
+    d.className = "chip";
+    d.textContent = text;
+    tbChips.appendChild(d);
+  };
+
+  // Reset state
+  items = [];
+  tasks = [];
+  selectedItemId = null;
+  activeTab = "air";
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.getAttribute("data-tab")==="air"));
+
+  // Selected aircraft inspections
+  const selectedAir = [];
+  document.querySelectorAll(".cbAir:checked").forEach(c => selectedAir.push(c.value));
+  selectedAir.forEach(ins => chip(ins));
+
+  // Create aircraft inspection items (one row each)
+  selectedAir.forEach(ins => {
+    const itemId = uid("AIR");
+    const taskIds = [];
+
+    const inspData = library?.aircraft_inspections?.[ins];
+    if(inspData?.sections){
+      Object.keys(inspData.sections).forEach(secName => {
+        (inspData.sections[secName] || []).forEach(t => {
+          const tid = uid("T");
+          tasks.push({
+            id: tid,
+            parentId: itemId,
+            title: t.title,
+            section: secName,
+            done: false,
+            type: "Inspection",
+            sourceLabel: ins,
+            nrcNo: ""
+          });
+          taskIds.push(tid);
+        });
+      });
+    }
+
+    items.push({
+      id: itemId,
+      category: "air",
+      label: `${ins} Inspection`,
+      meta: `Aircraft Inspection • ${ins}`,
+      tasks: taskIds
+    });
+  });
+
+  // Routine item (one row) + subtasks loaded from library if checked
+  if(includeRoutine.checked){
+    chip("Routine");
+    const itemId = uid("RTN");
+    const taskIds = [];
+    (library.routine_tasks || []).forEach(rt => {
+      const tid = uid("T");
+      tasks.push({
+        id: tid,
+        parentId: itemId,
+        title: rt.title,
+        section: rt.section,
+        done: false,
+        type: "Routine",
+        sourceLabel: "Routine",
+        nrcNo: ""
+      });
+      taskIds.push(tid);
     });
 
-  tbReg.innerText=reg.value||"—";
-  tbSN.innerText=sn.value||"—";
-  tbTT.innerText=tt.value||"—";
-  tbTC.innerText=tc.value||"—";
-  tbInsp.innerText=inspections.join(", ");
+    items.push({
+      id: itemId,
+      category: "rtn",
+      label: `Routine Tasks`,
+      meta: `Routine • Library`,
+      tasks: taskIds
+    });
+  }
 
-  // Load inspection tasks
-  inspections.forEach(ins=>{
-    const d=library.aircraft_inspections?.[ins];
-    if(!d) return;
-    Object.keys(d.sections).forEach(sec=>{
-      d.sections[sec].forEach(t=>{
+  // Engine events selection (one row per event per engine side)
+  const selectedEngEvts = [];
+  document.querySelectorAll(".cbEngEvt:checked").forEach(c => selectedEngEvts.push(c.value));
+  const sides = [];
+  if(engRH.checked) sides.push("RH");
+  if(engLH.checked) sides.push("LH");
+
+  // map event label -> library key (so it works with your current dataset)
+  const EVENT_MAP = {
+    "300 HRS Fuel Nozzles Change": "300 HRS ENG",
+    "600 HRS Fuel Nozzles Change": "600 HRS ENG",
+    "600 HRS Engine Inspection":   "600 HRS ENG",
+    "900 HRS Engine Inspection":   "900 HRS ENG"
+  };
+
+  selectedEngEvts.forEach(evt => {
+    sides.forEach(side => {
+      chip(`ENG ${side}`);
+      const itemId = uid("ENG");
+      const taskIds = [];
+
+      const libKey = EVENT_MAP[evt];
+      const engData = library?.engine_inspections?.[libKey];
+
+      // Build subtasks from engine library tasks (still hidden unless drill-down)
+      (engData?.tasks || []).forEach(t => {
+        const tid = uid("T");
         tasks.push({
-          title:t.title,
-          type:"Inspection",
-          section:sec,
-          inspection:ins,
-          nrc:"",
-          done:false
+          id: tid,
+          parentId: itemId,
+          title: t.title,
+          section: "Engine",
+          done: false,
+          type: "Inspection",
+          sourceLabel: `ENG ${side} • ${evt}`,
+          nrcNo: ""
         });
+        taskIds.push(tid);
+      });
+
+      items.push({
+        id: itemId,
+        category: "eng",
+        label: `ENG ${side} – ${evt}`,
+        meta: `Engine Event • ${side} • ${evt}`,
+        tasks: taskIds,
+        engineSide: side
       });
     });
   });
 
-  // Load routine tasks if selected
-  if(includeRoutine.checked){
-    library.routine_tasks.forEach(rt=>{
-      tasks.push({
-        title:rt.title,
-        type:"Routine",
-        section:rt.section,
-        inspection:null,
-        nrc:"",
-        done:false
-      });
-    });
-  }
-
+  // Switch pages
   pageSetup.classList.add("hidden");
   pageMain.classList.remove("hidden");
   topBar.classList.remove("hidden");
 
-  renderTally();
-  calculateProgress();
+  renderAll();
 }
 
-function addTaskManual(){
-  if(!taskTitle.value) return;
+/* ======================
+   RENDER
+====================== */
+function renderAll(){
+  renderSummary();
+  renderProgress();
+  closeDetails();
+}
+
+function renderSummary(){
+  const body = document.getElementById("summaryBody");
+  body.innerHTML = "";
+
+  const rows = items.filter(it => it.category === activeTab);
+
+  if(rows.length === 0){
+    body.innerHTML = `<tr><td colspan="3" class="small">No items in this section.</td></tr>`;
+    return;
+  }
+
+  rows.forEach(it => {
+    const subtasks = tasks.filter(t => t.parentId === it.id);
+    const total = subtasks.length;
+    const done = subtasks.filter(t => t.done).length;
+    const p = pct(done, total);
+
+    body.innerHTML += `
+      <tr class="clickRow" onclick="openDetails('${it.id}')">
+        <td><b>${it.label}</b><div class="small">${it.meta || ""}</div></td>
+        <td>
+          ${p}% <span class="small">(${done}/${total})</span>
+          <div class="bar"><div style="width:${p}%"></div></div>
+        </td>
+        <td>${statusLabel(p)}</td>
+      </tr>
+    `;
+  });
+}
+
+function renderProgress(){
+  // Inspection progress: only aircraft inspections items (category air)
+  inspectionProgress.innerHTML = "";
+  const airItems = items.filter(i => i.category === "air");
+  if(airItems.length === 0){
+    inspectionProgress.innerHTML = `<div class="small">No aircraft inspections selected.</div>`;
+  }else{
+    airItems.forEach(it => {
+      const subtasks = tasks.filter(t => t.parentId === it.id);
+      const total = subtasks.length;
+      const done = subtasks.filter(t => t.done).length;
+      const p = pct(done, total);
+      inspectionProgress.innerHTML += `
+        <p><b>${it.label}</b> — ${p}% <span class="small">(${done}/${total})</span>
+          <div class="bar"><div style="width:${p}%"></div></div>
+        </p>
+      `;
+    });
+  }
+
+  // Team progress: across ALL subtasks (inspection + routine + engine + nrc subtasks)
+  teamProgress.innerHTML = "";
+  SECTIONS.forEach(sec => {
+    const st = tasks.filter(t => t.section === sec);
+    const total = st.length;
+    const done = st.filter(t => t.done).length;
+    const p = pct(done, total);
+    teamProgress.innerHTML += `
+      <p><b>${sec}</b> — ${p}% <span class="small">(${done}/${total})</span>
+        <div class="bar"><div style="width:${p}%"></div></div>
+      </p>
+    `;
+  });
+}
+
+/* ======================
+   DETAILS / DRILL-DOWN
+====================== */
+function closeDetails(){
+  selectedItemId = null;
+  detailsTitle.textContent = "Select an item";
+  detailsMeta.textContent = "Click an inspection / routine / NRC row to view subtasks.";
+  detailsBody.innerHTML = `<div class="small">No item selected.</div>`;
+}
+
+function openDetails(itemId){
+  selectedItemId = itemId;
+  const it = items.find(x => x.id === itemId);
+  if(!it){ closeDetails(); return; }
+
+  detailsTitle.textContent = it.label;
+  const subtasks = tasks.filter(t => t.parentId === itemId);
+  const done = subtasks.filter(t => t.done).length;
+  detailsMeta.textContent = `${it.meta || ""} • ${done}/${subtasks.length} done`;
+
+  // Group by section (like PDF)
+  const groups = {};
+  subtasks.forEach(t => {
+    if(!groups[t.section]) groups[t.section] = [];
+    groups[t.section].push(t);
+  });
+
+  // Keep section order based on SECTIONS list
+  const orderedSections = SECTIONS.filter(s => groups[s]?.length).concat(
+    Object.keys(groups).filter(s => !SECTIONS.includes(s))
+  );
+
+  let html = "";
+
+  if(subtasks.length === 0){
+    html = `<div class="small">No subtasks found for this item (library may not contain tasks yet).</div>`;
+  }else{
+    orderedSections.forEach(sec => {
+      html += `<div class="groupTitle"><i class="fa-solid fa-layer-group"></i> ${sec}</div>`;
+      groups[sec].forEach(t => {
+        const checked = t.done ? "checked" : "";
+        html += `
+          <div class="taskItem">
+            <div class="taskTop">
+              <div>
+                <div class="name">${escapeHtml(t.title)}</div>
+                <div class="sub">
+                  Type: <span class="pill">${t.type}</span>
+                  <span class="pill">${escapeHtml(t.sourceLabel || "")}</span>
+                </div>
+              </div>
+              <div class="inline">
+                <label class="inline" style="margin:0; font-weight:normal;">
+                  <input type="checkbox" ${checked} onchange="toggleDone('${t.id}', this.checked)">
+                  Done
+                </label>
+              </div>
+            </div>
+
+            <div class="taskControls">
+              <div class="inline">
+                <span class="pill">Work Required?</span>
+                <select class="miniInput" onchange="setWorkReq('${t.id}', this.value)">
+                  <option value="NO">NO</option>
+                  <option value="YES">YES</option>
+                </select>
+              </div>
+
+              <div class="inline">
+                <input class="miniInput" placeholder="NRC #" id="nrc_${t.id}" disabled />
+                <button class="btnSmall" id="btnNrc_${t.id}" disabled onclick="createNRCFromTask('${t.id}')">
+                  Create NRC
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    });
+  }
+
+  detailsBody.innerHTML = html;
+}
+
+function toggleDone(taskId, isDone){
+  const t = tasks.find(x => x.id === taskId);
+  if(!t) return;
+  t.done = isDone;
+  renderSummary();
+  renderProgress();
+  if(selectedItemId) openDetails(selectedItemId); // refresh details
+}
+
+function setWorkReq(taskId, val){
+  const inp = document.getElementById("nrc_" + taskId);
+  const btn = document.getElementById("btnNrc_" + taskId);
+  const enable = (val === "YES");
+  if(inp) inp.disabled = !enable;
+  if(btn) btn.disabled = !enable;
+}
+
+function createNRCFromTask(taskId){
+  const t = tasks.find(x => x.id === taskId);
+  if(!t) return;
+
+  const inp = document.getElementById("nrc_" + taskId);
+  const nrcNo = (inp?.value || "").trim();
+  if(!nrcNo){
+    alert("Please enter NRC #");
+    return;
+  }
+
+  // Create NRC summary item (one row) + one subtask (linked to the original title)
+  const itemId = uid("NRC");
+  const tid = uid("T");
+
   tasks.push({
-    title:taskTitle.value,
-    type:taskType.value,
-    section:section.value,
-    inspection:null,
-    nrc:(taskType.value==="Non-Routine"?nrc.value:""),
-    done:false
+    id: tid,
+    parentId: itemId,
+    title: t.title,
+    section: t.section,
+    done: false,
+    type: "Non-Routine",
+    sourceLabel: `From: ${t.sourceLabel}`,
+    nrcNo: nrcNo
   });
-  taskTitle.value="";
-  nrc.value="";
-  renderTally();
-  calculateProgress();
+
+  items.push({
+    id: itemId,
+    category: "nrc",
+    label: `NRC ${nrcNo}`,
+    meta: `${t.section} • linked to task`,
+    tasks: [tid]
+  });
+
+  // Optional: mark that task has NRC number stored
+  t.nrcNo = nrcNo;
+
+  // Refresh UI
+  renderSummary();
+  renderProgress();
+  // Switch to NRC tab to show it quickly
+  setTab("nrc");
 }
 
-function markLastDone(){
-  if(tasks.length===0) return;
-  tasks[tasks.length-1].done=true;
-  renderTally();
-  calculateProgress();
+/* ======================
+   MANUAL ITEMS
+====================== */
+function addManualItem(){
+  const title = (manualTitle.value || "").trim();
+  const type = manualType.value;
+  const sec  = manualSection.value;
+  const nrcNo = (manualNRC.value || "").trim();
+
+  if(!title){ alert("Enter task title"); return; }
+  if(type === "Non-Routine" && !nrcNo){
+    alert("Enter NRC # for Non-Routine"); return;
+  }
+
+  if(type === "Routine"){
+    // If Routine item exists (library routine), add as extra subtask under that item; else create routine item
+    let routineItem = items.find(i => i.category === "rtn");
+    if(!routineItem){
+      routineItem = { id: uid("RTN"), category:"rtn", label:"Routine Tasks", meta:"Routine • Manual", tasks:[] };
+      items.push(routineItem);
+    }
+    const tid = uid("T");
+    tasks.push({
+      id: tid,
+      parentId: routineItem.id,
+      title,
+      section: sec,
+      done: false,
+      type: "Routine",
+      sourceLabel: "Manual Routine",
+      nrcNo: ""
+    });
+    routineItem.tasks.push(tid);
+    setTab("rtn");
+  }else{
+    const itemId = uid("NRC");
+    const tid = uid("T");
+    tasks.push({
+      id: tid,
+      parentId: itemId,
+      title,
+      section: sec,
+      done: false,
+      type: "Non-Routine",
+      sourceLabel: "Manual NRC",
+      nrcNo: nrcNo
+    });
+    items.push({
+      id: itemId,
+      category:"nrc",
+      label:`NRC ${nrcNo}`,
+      meta:`${sec} • manual`,
+      tasks:[tid]
+    });
+    setTab("nrc");
+  }
+
+  manualTitle.value = "";
+  manualNRC.value = "";
+  renderSummary();
+  renderProgress();
+  closeDetails();
 }
 
-function renderTally(){
-  let i=1;
-  tallyBody.innerHTML="";
-  inspections.forEach(ins=>{
-    tallyBody.innerHTML+=`
-      <tr><td>${i++}</td><td>${ins} Inspection</td><td>❌</td></tr>`;
-  });
-  tasks.forEach(t=>{
-    tallyBody.innerHTML+=`
-      <tr>
-        <td>${i++}</td>
-        <td>${t.type==="Non-Routine"?"NRC "+t.nrc+" – ":""}${t.title}</td>
-        <td class="${t.done?"done":"notdone"}">${t.done?"✔":"❌"}</td>
-      </tr>`;
-  });
+/* ======================
+   SAFE HTML
+====================== */
+function escapeHtml(str){
+  return String(str)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
-
-function calculateProgress(){
-  inspectionProgress.innerHTML="";
-  inspections.forEach(ins=>{
-    const it=tasks.filter(t=>t.type==="Inspection"&&t.inspection===ins);
-    const d=it.filter(t=>t.done).length;
-    inspectionProgress.innerHTML+=`
-      <p><b>${ins}</b>: ${it.length?Math.round(d/it.length*100):0}%</p>`;
-  });
-
-  sectionProgress.innerHTML="";
-  SECTIONS.forEach(sec=>{
-    const st=tasks.filter(t=>t.section===sec);
-    const d=st.filter(t=>t.done).length;
-    sectionProgress.innerHTML+=`
-      <p><b>${sec}</b>: ${st.length?Math.round(d/st.length*100):0}%</p>`;
-  });
-}
-
-loadLibrary();
 </script>
 
 </body>
