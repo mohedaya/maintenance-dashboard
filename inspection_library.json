@@ -10,5 +10,25 @@
     "Tail Rotor & Drive",
     "Engine",
     "Avionics & Electrical"
-  ]
+  ],
+
+  "aircraft_inspections": {
+    "100 HRS": {
+      "revision": "Rev A",
+      "sections": {
+        "Engine": [
+          { "id": "100-ENG-01", "title": "General engine visual inspection" },
+          { "id": "100-ENG-02", "title": "Check oil leaks" }
+        ],
+
+        "Main Rotor & MGB": [
+          { "id": "100-MR-01", "title": "Inspect main rotor head" }
+        ],
+
+        "Fuselage / Airframe": [
+          { "id": "100-AIR-01", "title": "General airframe inspection" }
+        ]
+      }
+    }
+  }
 }
