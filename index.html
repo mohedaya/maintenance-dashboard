@@ -7,11 +7,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:#f4f6f9;
-}
+body{ margin:0; font-family:Arial, sans-serif; background:#f4f6f9; }
 .hidden{ display:none; }
 
 header{
@@ -21,6 +17,8 @@ header{
   display:flex;
   justify-content:space-between;
   align-items:center;
+  gap:16px;
+  flex-wrap:wrap;
 }
 header small{ color:#cbd5e1; }
 
@@ -31,6 +29,9 @@ header small{ color:#cbd5e1; }
   grid-template-columns:1fr 1fr;
   gap:20px;
 }
+@media (max-width: 900px){
+  .grid{ grid-template-columns:1fr; }
+}
 
 .card{
   background:white;
@@ -40,18 +41,8 @@ header small{ color:#cbd5e1; }
 }
 
 h2{ margin-top:0; }
-
-label{
-  font-weight:bold;
-  display:block;
-  margin-top:10px;
-}
-
-input, textarea{
-  width:100%;
-  padding:6px;
-  margin-top:4px;
-}
+label{ font-weight:bold; display:block; margin-top:10px; }
+input, textarea{ width:100%; padding:6px; margin-top:4px; box-sizing:border-box; }
 
 button{
   margin-top:15px;
@@ -64,15 +55,8 @@ button{
 }
 button:hover{ background:#1d4ed8; }
 
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:10px;
-}
-th, td{
-  border:1px solid #ccc;
-  padding:6px;
-}
+table{ width:100%; border-collapse:collapse; margin-top:10px; }
+th, td{ border:1px solid #ccc; padding:6px; vertical-align:top; }
 th{ background:#e5e7eb; }
 
 .done{ color:green; font-weight:bold; }
@@ -85,6 +69,15 @@ th{ background:#e5e7eb; }
   border-radius:6px;
   font-size:12px;
 }
+
+.warn{
+  background:#fff7ed;
+  border:1px solid #fed7aa;
+  padding:10px;
+  border-radius:8px;
+  color:#7c2d12;
+}
+.small{ font-size:12px; color:#64748b; }
 </style>
 </head>
 
@@ -93,186 +86,327 @@ th{ background:#e5e7eb; }
 <!-- ================= TOP BAR (MAIN PAGE) ================= -->
 <header id="topBar" class="hidden">
   <div>
-    <b id="tbReg"></b>
-    <small> | TT: <span id="tbTT"></span> | TC: <span id="tbTC"></span></small>
+    <b id="tbReg">—</b>
+    <small> | TT: <span id="tbTT">—</span> | TC: <span id="tbTC">—</span> | S/N: <span id="tbSN">—</span></small>
   </div>
   <div>
     <small>Inspections:</small>
-    <span id="tbInsp"></span>
+    <span id="tbInsp" class="small">—</span>
   </div>
 </header>
 
 <!-- ================= PAGE 1 : SETUP ================= -->
 <div id="pageSetup" class="container">
 
-<div class="card">
-<h2>📌 Aircraft Data & Planning</h2>
+  <div class="card">
+    <h2>📌 Aircraft Data & Planning</h2>
 
-<div class="grid">
-<div>
-  <label>Aircraft Registration</label>
-  <input id="reg">
+    <div class="grid">
+      <div>
+        <label>Aircraft Registration</label>
+        <input id="reg">
 
-  <label>Serial Number (S/N)</label>
-  <input id="sn">
+        <label>Serial Number (S/N)</label>
+        <input id="sn">
 
-  <label>Total Time (TT)</label>
-  <input id="tt">
+        <label>Total Time (TT)</label>
+        <input id="tt">
 
-  <label>Total Cycles (TC)</label>
-  <input id="tc">
-</div>
+        <label>Total Cycles (TC)</label>
+        <input id="tc">
+      </div>
 
-<div>
-  <label>Required Inspections (Planning)</label>
-  <label><input type="checkbox" value="50 HRS"> 50 HRS</label>
-  <label><input type="checkbox" value="100 HRS"> 100 HRS</label>
-  <label><input type="checkbox" value="300 HRS"> 300 HRS</label>
-  <label><input type="checkbox" value="600 HRS"> 600 HRS</label>
-  <label><input type="checkbox" value="1200 HRS"> 1200 HRS</label>
-  <label><input type="checkbox" value="2400 HRS"> 2400 HRS</label>
-  <label><input type="checkbox" value="1 YEAR"> 1 YEAR</label>
-  <label><input type="checkbox" value="2 YEAR"> 2 YEAR</label>
-  <label><input type="checkbox" value="4 YEAR"> 4 YEAR</label>
-</div>
-</div>
+      <div>
+        <label>Required Inspections (Planning)</label>
+        <label><input type="checkbox" value="50 HRS"> 50 HRS</label>
+        <label><input type="checkbox" value="100 HRS"> 100 HRS</label>
+        <label><input type="checkbox" value="300 HRS"> 300 HRS</label>
+        <label><input type="checkbox" value="600 HRS"> 600 HRS</label>
+        <label><input type="checkbox" value="1200 HRS"> 1200 HRS</label>
+        <label><input type="checkbox" value="2400 HRS"> 2400 HRS</label>
+        <label><input type="checkbox" value="1 YEAR"> 1 YEAR</label>
+        <label><input type="checkbox" value="2 YEAR"> 2 YEAR</label>
+        <label><input type="checkbox" value="4 YEAR"> 4 YEAR</label>
+      </div>
+    </div>
 
-<label>Planned Consumables Order</label>
-<textarea placeholder="Oil, filters, seals…"></textarea>
+    <label>Planned Consumables Order</label>
+    <textarea id="consumables" placeholder="Oil, filters, seals…"></textarea>
 
-<button onclick="startMaintenance()">▶ Start Maintenance</button>
-</div>
+    <div id="libStatus" class="warn" style="margin-top:12px;">
+      Library status: <b>Loading…</b>
+      <div class="small">Make sure <b>inspection_library.json</b> is in the same GitHub repo as <b>index.html</b>.</div>
+    </div>
+
+    <button id="btnStart" onclick="startMaintenance()" disabled>▶ Start Maintenance</button>
+  </div>
 
 </div>
 
 <!-- ================= PAGE 2 : MAIN CONTROL ================= -->
 <div id="pageMain" class="container hidden">
 
-<div class="grid">
+  <div class="grid">
+    <div class="card">
+      <h2>📊 Inspection Progress</h2>
+      <div id="inspectionProgress" class="small"></div>
+    </div>
 
-<div class="card">
-<h2>🛠 Task Control</h2>
+    <div class="card">
+      <h2>👥 Section / Team Progress</h2>
+      <div id="sectionProgress" class="small"></div>
+    </div>
+  </div>
 
-<input id="taskTitle" placeholder="Task title">
+  <div class="grid">
+    <div class="card">
+      <h2>🛠 Task Control</h2>
 
-<label>Section / Team</label>
-<select id="section">
-  <option>Fuselage / Airframe</option>
-  <option>Main Rotor & MGB</option>
-  <option>Tail Rotor & Drive</option>
-  <option>Engine</option>
-  <option>Avionics & Electrical</option>
-</select>
+      <input id="taskTitle" placeholder="Task title (manual add)">
 
-<label>Task Type</label>
-<select id="taskType">
-  <option>Inspection</option>
-  <option>Routine</option>
-  <option>Non-Routine</option>
-</select>
+      <label>Section / Team</label>
+      <select id="section">
+        <option>Fuselage / Airframe</option>
+        <option>Main Rotor & MGB</option>
+        <option>Tail Rotor & Drive</option>
+        <option>Engine</option>
+        <option>Avionics & Electrical</option>
+      </select>
 
-<label>NRC # (only if Non-Routine)</label>
-<input id="nrc">
+      <label>Task Type</label>
+      <select id="taskType">
+        <option>Inspection</option>
+        <option>Routine</option>
+        <option>Non-Routine</option>
+      </select>
 
-<button onclick="addTask()">➕ Add Task</button>
-</div>
+      <label>NRC # (only if Non-Routine)</label>
+      <input id="nrc">
 
-<div class="card">
-<h2>📋 Tally Sheet</h2>
+      <button onclick="addTaskManual()">➕ Add Task</button>
 
-<table>
-<thead>
-<tr>
-  <th>#</th>
-  <th>Reference</th>
-  <th>Status</th>
-</tr>
-</thead>
-<tbody id="tallyBody"></tbody>
-</table>
+      <div class="small" style="margin-top:10px;">
+        Manual tasks will also appear in the Tally Sheet.
+      </div>
+    </div>
 
-<button onclick="markLastDone()">✔ Mark Last Task Done</button>
-</div>
+    <div class="card">
+      <h2>📋 Tally Sheet</h2>
 
-</div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Reference</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="tallyBody"></tbody>
+      </table>
 
-<div class="grid">
-<div class="card">
-<h2>📦 Parts Control</h2>
-<p>AOG: <span class="badge">GOOD</span></p>
-<p>Issued: <span class="badge">GOOD</span></p>
-<p>Available: <span class="badge">GOOD</span></p>
-</div>
-</div>
+      <button onclick="markLastDone()">✔ Mark Last Task Done</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>📦 Parts Control</h2>
+      <p>AOG: <span class="badge">GOOD</span></p>
+      <p>Issued: <span class="badge">GOOD</span></p>
+      <p>Available: <span class="badge">GOOD</span></p>
+      <div class="small">Parts history will be added in the next step.</div>
+    </div>
+  </div>
 
 </div>
 
 <script>
-let inspections=[];
-let tasks=[];
+/* =======================
+   GLOBAL STATE
+======================= */
+let library = null;          // loaded from inspection_library.json
+let inspections = [];        // selected inspections (strings)
+let tasks = [];              // all tasks for this maintenance event
 
-function startMaintenance(){
-  inspections=[];
-  document.querySelectorAll('#pageSetup input[type=checkbox]:checked')
-    .forEach(c=>inspections.push(c.value));
+const SECTIONS = [
+  "Fuselage / Airframe",
+  "Main Rotor & MGB",
+  "Tail Rotor & Drive",
+  "Engine",
+  "Avionics & Electrical"
+];
 
-  document.getElementById("tbReg").innerText = reg.value;
-  document.getElementById("tbTT").innerText = tt.value;
-  document.getElementById("tbTC").innerText = tc.value;
-  document.getElementById("tbInsp").innerText = inspections.join(", ");
+/* =======================
+   LOAD LIBRARY
+======================= */
+async function loadLibrary(){
+  const status = document.getElementById("libStatus");
+  try{
+    const res = await fetch("inspection_library.json", { cache: "no-store" });
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    library = await res.json();
 
-  document.getElementById("pageSetup").classList.add("hidden");
-  document.getElementById("pageMain").classList.remove("hidden");
-  document.getElementById("topBar").classList.remove("hidden");
-
-  renderTally();
+    status.innerHTML = `Library status: <b>Loaded ✅</b>
+      <div class="small">inspection_library.json is ready.</div>`;
+    document.getElementById("btnStart").disabled = false;
+  }catch(e){
+    status.innerHTML = `Library status: <b>NOT FOUND ❌</b>
+      <div class="small">Error: ${String(e.message || e)}</div>
+      <div class="small">Make sure <b>inspection_library.json</b> exists in the same repo folder as <b>index.html</b>.</div>`;
+    document.getElementById("btnStart").disabled = true;
+  }
 }
 
-function addTask(){
-  if(!taskTitle.value) return;
-  tasks.push({
-    title:taskTitle.value,
-    type:taskType.value,
-    section:section.value,
-    nrc:nrc.value,
-    done:false
+/* =======================
+   START MAINTENANCE
+======================= */
+function startMaintenance(){
+  if(!library){
+    alert("Library not loaded. Check inspection_library.json");
+    return;
+  }
+
+  // read selected inspections
+  inspections = [];
+  document.querySelectorAll('#pageSetup input[type=checkbox]:checked')
+    .forEach(c => inspections.push(c.value));
+
+  // show top bar
+  tbReg.innerText = reg.value || "—";
+  tbSN.innerText  = sn.value  || "—";
+  tbTT.innerText  = tt.value  || "—";
+  tbTC.innerText  = tc.value  || "—";
+  tbInsp.innerText = inspections.length ? inspections.join(", ") : "—";
+
+  // build tasks from library (inspection tasks only)
+  tasks = [];
+  inspections.forEach(ins => {
+    const inspData = library?.aircraft_inspections?.[ins];
+    if(!inspData) return;
+
+    Object.keys(inspData.sections || {}).forEach(secName => {
+      (inspData.sections[secName] || []).forEach(t => {
+        tasks.push({
+          title: t.title,
+          type: "Inspection",
+          section: secName,
+          inspection: ins,    // IMPORTANT: used for inspection %
+          nrc: "",
+          done: false
+        });
+      });
+    });
   });
-  taskTitle.value="";
-  nrc.value="";
+
+  // switch pages
+  pageSetup.classList.add("hidden");
+  pageMain.classList.remove("hidden");
+  topBar.classList.remove("hidden");
+
   renderTally();
+  calculateProgress();
+}
+
+/* =======================
+   MANUAL TASKS
+======================= */
+function addTaskManual(){
+  const title = taskTitle.value.trim();
+  if(!title) return;
+
+  const type = taskType.value;
+  const sec = section.value;
+  const nrcNo = nrc.value.trim();
+
+  tasks.push({
+    title,
+    type,
+    section: sec,
+    inspection: null,            // manual tasks not tied to a specific inspection yet
+    nrc: (type === "Non-Routine" ? nrcNo : ""),
+    done: false
+  });
+
+  taskTitle.value = "";
+  nrc.value = "";
+
+  renderTally();
+  calculateProgress();
 }
 
 function markLastDone(){
-  if(tasks.length===0) return;
-  tasks[tasks.length-1].done=true;
+  if(tasks.length === 0) return;
+  tasks[tasks.length - 1].done = true;
   renderTally();
+  calculateProgress();
 }
 
+/* =======================
+   TALLY SHEET
+======================= */
 function renderTally(){
-  const t=document.getElementById("tallyBody");
-  t.innerHTML="";
-  let i=1;
+  const t = document.getElementById("tallyBody");
+  t.innerHTML = "";
+  let i = 1;
 
-  inspections.forEach(ins=>{
-    t.innerHTML+=`
-    <tr>
-      <td>${i++}</td>
-      <td>${ins} Inspection</td>
-      <td>❌</td>
-    </tr>`;
+  // inspections as top-level items
+  inspections.forEach(ins => {
+    t.innerHTML += `
+      <tr>
+        <td>${i++}</td>
+        <td>${ins} Inspection</td>
+        <td>❌</td>
+      </tr>
+    `;
   });
 
-  tasks.forEach(ts=>{
-    t.innerHTML+=`
-    <tr>
-      <td>${i++}</td>
-      <td>${ts.type==="Non-Routine" ? "NRC "+ts.nrc+" – ":""}${ts.title}</td>
-      <td class="${ts.done?'done':'notdone'}">
-        ${ts.done?'✔':'❌'}
-      </td>
-    </tr>`;
+  // tasks
+  tasks.forEach(ts => {
+    const ref = (ts.type === "Non-Routine" && ts.nrc)
+      ? `NRC ${ts.nrc} – ${ts.title}`
+      : ts.title;
+
+    t.innerHTML += `
+      <tr>
+        <td>${i++}</td>
+        <td>${ref}</td>
+        <td class="${ts.done ? 'done' : 'notdone'}">${ts.done ? '✔' : '❌'}</td>
+      </tr>
+    `;
   });
 }
+
+/* =======================
+   PROGRESS (Inspection % + Section %)
+======================= */
+function calculateProgress(){
+  const inspDiv = document.getElementById("inspectionProgress");
+  const secDiv  = document.getElementById("sectionProgress");
+
+  inspDiv.innerHTML = "";
+  secDiv.innerHTML  = "";
+
+  // Inspection %: tasks tied to that inspection ONLY
+  inspections.forEach(ins => {
+    const inspTasks = tasks.filter(t => t.type === "Inspection" && t.inspection === ins);
+    const total = inspTasks.length;
+    const done  = inspTasks.filter(t => t.done).length;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    inspDiv.innerHTML += `<p><b>${ins}</b>: ${pct}% (${done}/${total})</p>`;
+  });
+
+  // Section %: all tasks in that section (inspection + routine + non-routine)
+  SECTIONS.forEach(sec => {
+    const secTasks = tasks.filter(t => t.section === sec);
+    const total = secTasks.length;
+    const done  = secTasks.filter(t => t.done).length;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    secDiv.innerHTML += `<p><b>${sec}</b>: ${pct}% (${done}/${total})</p>`;
+  });
+}
+
+// INIT
+loadLibrary();
 </script>
 
 </body>
