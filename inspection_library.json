@@ -17,72 +17,58 @@
       "revision": "Rev A",
       "sections": {
         "Engine": [
-          {
-            "id": "100-ENG-01",
-            "title": "General engine visual inspection"
-          },
-          {
-            "id": "100-ENG-02",
-            "title": "Check oil leaks"
-          }
+          { "id": "100-ENG-01", "title": "General engine visual inspection" },
+          { "id": "100-ENG-02", "title": "Check oil leaks" }
         ],
-
         "Main Rotor & MGB": [
-          {
-            "id": "100-MR-01",
-            "title": "Inspect main rotor head"
-          }
+          { "id": "100-MR-01", "title": "Inspect main rotor head" }
         ],
-
         "Tail Rotor & Drive": [
-          {
-            "id": "100-TR-01",
-            "title": "Inspect tail rotor gearbox"
-          }
+          { "id": "100-TR-01", "title": "Inspect tail rotor gearbox" }
         ],
-
         "Fuselage / Airframe": [
-          {
-            "id": "100-AIR-01",
-            "title": "General airframe inspection"
-          }
+          { "id": "100-AIR-01", "title": "General airframe inspection" }
         ],
-
         "Avionics & Electrical": [
-          {
-            "id": "100-AV-01",
-            "title": "Avionics operational check"
-          }
+          { "id": "100-AV-01", "title": "Avionics operational check" }
         ]
       }
     }
   },
 
-  "routine_tasks": [
-    {
-      "id": "RT-ENG-01",
-      "section": "Engine",
-      "title": "General lubrication"
+  "engine_inspections": {
+    "300 HRS ENG": {
+      "revision": "Rev A",
+      "tasks": [
+        { "id": "ENG300-01", "title": "Fuel nozzle inspection" },
+        { "id": "ENG300-02", "title": "Oil filter inspection" },
+        { "id": "ENG300-03", "title": "Check engine external leaks" }
+      ]
     },
-    {
-      "id": "RT-AIR-01",
-      "section": "Fuselage / Airframe",
-      "title": "Cleaning and servicing"
+
+    "600 HRS ENG": {
+      "revision": "Rev A",
+      "tasks": [
+        { "id": "ENG600-01", "title": "Engine performance check" },
+        { "id": "ENG600-02", "title": "FCU inspection" },
+        { "id": "ENG600-03", "title": "Check engine mounts" }
+      ]
     },
-    {
-      "id": "RT-MR-01",
-      "section": "Main Rotor & MGB",
-      "title": "Main rotor lubrication"
-    },
-    {
-      "id": "RT-TR-01",
-      "section": "Tail Rotor & Drive",
-      "title": "Tail rotor lubrication"
-    },
-    {
-      "id": "RT-AV-01",
-      "section": "Avionics & Electrical",
-      "title": "Operational check"
+
+    "900 HRS ENG": {
+      "revision": "Rev A",
+      "tasks": [
+        { "id": "ENG900-01", "title": "Borescope inspection" },
+        { "id": "ENG900-02", "title": "Check compressor condition" }
+      ]
     }
+  },
+
+  "routine_tasks": [
+    { "id": "RT-ENG-01", "section": "Engine", "title": "General lubrication" },
+    { "id": "RT-AIR-01", "section": "Fuselage / Airframe", "title": "Cleaning and servicing" },
+    { "id": "RT-MR-01", "section": "Main Rotor & MGB", "title": "Main rotor lubrication" },
+    { "id": "RT-TR-01", "section": "Tail Rotor & Drive", "title": "Tail rotor lubrication" },
+    { "id": "RT-AV-01", "section": "Avionics & Electrical", "title": "Operational check" }
   ]
 }
