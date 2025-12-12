@@ -1,44 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Maintenance Dashboard</title>
+  <meta charset="UTF-8">
+  <title>Helicopter Maintenance Dashboard</title>
 </head>
 <body>
 
-<h2>Helicopter Maintenance Dashboard</h2>
+  <h1>Helicopter Maintenance Dashboard</h1>
 
-<label>Aircraft Reg:</label><br>
-<input type="text" id="aircraft"><br><br>
-
-<label>Select Packages:</label><br>
-<input type="checkbox" value="300HR"> 300 HR Aircraft<br>
-<input type="checkbox" value="600HR"> 600 HR Aircraft<br>
-<input type="checkbox" value="ENG300"> 300 HR Engine<br>
-<input type="checkbox" value="ENG600"> 600 HR Engine<br>
-<input type="checkbox" value="ROUTINE"> Routine Tasks<br><br>
-
-<button onclick="startWork()">Start Work Package</button>
-
-<pre id="output"></pre>
-
-<script>
-function startWork() {
-  const aircraft = document.getElementById("aircraft").value;
-  const packages = [];
-
-  document.querySelectorAll('input[type="checkbox"]:checked')
-    .forEach(cb => packages.push(cb.value));
-
-  const workPackage = {
-    aircraft: aircraft,
-    packages: packages,
-    status: "In Progress"
-  };
-
-  document.getElementById("output").textContent =
-    JSON.stringify(workPackage, null, 2);
-}
-</script>
+  <p>Select the inspection package for the aircraft.</p>
 
 </body>
 </html>
