@@ -2,5 +2,13 @@
   "meta": {
     "aircraft_type": "AW139",
     "description": "Inspection and Routine Task Library"
-  }
+  },
+
+  "sections": [
+    "Fuselage / Airframe",
+    "Main Rotor & MGB",
+    "Tail Rotor & Drive",
+    "Engine",
+    "Avionics & Electrical"
+  ]
 }
