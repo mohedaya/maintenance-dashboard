@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Helicopter Maintenance Control</title>
+<title>Helicopter Maintenance Dashboard</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
@@ -12,16 +12,23 @@ body{
   font-family:Arial, sans-serif;
   background:#f4f6f9;
 }
+.hidden{ display:none; }
+
 header{
   background:#1e293b;
   color:white;
-  padding:15px 20px;
+  padding:12px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
+header small{ color:#cbd5e1; }
+
 .container{ padding:20px; }
 
 .grid{
   display:grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns:1fr 1fr;
   gap:20px;
 }
 
@@ -33,9 +40,14 @@ header{
 }
 
 h2{ margin-top:0; }
-label{ font-weight:bold; display:block; margin-top:10px; }
 
-input, select{
+label{
+  font-weight:bold;
+  display:block;
+  margin-top:10px;
+}
+
+input, textarea{
   width:100%;
   padding:6px;
   margin-top:4px;
@@ -78,13 +90,21 @@ th{ background:#e5e7eb; }
 
 <body>
 
-<header>
-  <h1><i class="fa-solid fa-helicopter"></i> Helicopter Maintenance Control</h1>
+<!-- ================= TOP BAR (MAIN PAGE) ================= -->
+<header id="topBar" class="hidden">
+  <div>
+    <b id="tbReg"></b>
+    <small> | TT: <span id="tbTT"></span> | TC: <span id="tbTC"></span></small>
+  </div>
+  <div>
+    <small>Inspections:</small>
+    <span id="tbInsp"></span>
+  </div>
 </header>
 
-<div class="container">
+<!-- ================= PAGE 1 : SETUP ================= -->
+<div id="pageSetup" class="container">
 
-<!-- ================= DATA ENTRY ================= -->
 <div class="card">
 <h2>📌 Aircraft Data & Planning</h2>
 
@@ -104,40 +124,45 @@ th{ background:#e5e7eb; }
 </div>
 
 <div>
-  <label>Planned Consumables Order</label>
-  <input placeholder="Oil, filters, O-rings…">
-</div>
+  <label>Required Inspections (Planning)</label>
+  <label><input type="checkbox" value="50 HRS"> 50 HRS</label>
+  <label><input type="checkbox" value="100 HRS"> 100 HRS</label>
+  <label><input type="checkbox" value="300 HRS"> 300 HRS</label>
+  <label><input type="checkbox" value="600 HRS"> 600 HRS</label>
+  <label><input type="checkbox" value="1200 HRS"> 1200 HRS</label>
+  <label><input type="checkbox" value="2400 HRS"> 2400 HRS</label>
+  <label><input type="checkbox" value="1 YEAR"> 1 YEAR</label>
+  <label><input type="checkbox" value="2 YEAR"> 2 YEAR</label>
+  <label><input type="checkbox" value="4 YEAR"> 4 YEAR</label>
 </div>
 </div>
 
-<!-- ================= PACKAGE SELECTION ================= -->
-<div class="card">
-<h2>📦 Inspection Packages (Planning)</h2>
+<label>Planned Consumables Order</label>
+<textarea placeholder="Oil, filters, seals…"></textarea>
 
-<label>Select required inspections</label>
-<select id="inspectionSelect" multiple>
-  <option>50 HRS</option>
-  <option>100 HRS</option>
-  <option>300 HRS</option>
-  <option>600 HRS</option>
-  <option>1200 HRS</option>
-  <option>2400 HRS</option>
-  <option>1 YEAR</option>
-  <option>2 YEAR</option>
-  <option>4 YEAR</option>
-</select>
-
-<button onclick="addInspections()">➕ Add Inspections to Tally</button>
+<button onclick="startMaintenance()">▶ Start Maintenance</button>
 </div>
 
-<!-- ================= TASK ENTRY ================= -->
+</div>
+
+<!-- ================= PAGE 2 : MAIN CONTROL ================= -->
+<div id="pageMain" class="container hidden">
+
 <div class="grid">
 
 <div class="card">
-<h2>🛠 Add Task</h2>
+<h2>🛠 Task Control</h2>
 
-<label>Task Title</label>
-<input id="taskTitle">
+<input id="taskTitle" placeholder="Task title">
+
+<label>Section / Team</label>
+<select id="section">
+  <option>Fuselage / Airframe</option>
+  <option>Main Rotor & MGB</option>
+  <option>Tail Rotor & Drive</option>
+  <option>Engine</option>
+  <option>Avionics & Electrical</option>
+</select>
 
 <label>Task Type</label>
 <select id="taskType">
@@ -146,65 +171,38 @@ th{ background:#e5e7eb; }
   <option>Non-Routine</option>
 </select>
 
-<label>Section / Team</label>
-<select id="section">
-  <option>Aircraft</option>
-  <option>Engine RH</option>
-  <option>Engine LH</option>
-  <option>Routine</option>
-</select>
-
-<label>NRC # (only for Non-Routine)</label>
+<label>NRC # (only if Non-Routine)</label>
 <input id="nrc">
 
 <button onclick="addTask()">➕ Add Task</button>
 </div>
 
 <div class="card">
-<h2>🛠 Tasks</h2>
+<h2>📋 Tally Sheet</h2>
 
 <table>
 <thead>
 <tr>
-<th>#</th>
-<th>Task Title</th>
-<th>Type</th>
-<th>Section</th>
-<th>Status</th>
+  <th>#</th>
+  <th>Reference</th>
+  <th>Status</th>
 </tr>
 </thead>
-<tbody id="taskBody"></tbody>
+<tbody id="tallyBody"></tbody>
 </table>
 
-<button onclick="markDone()">✔ Mark Last Task Done</button>
+<button onclick="markLastDone()">✔ Mark Last Task Done</button>
 </div>
 
 </div>
 
-<!-- ================= CONTROL PANEL ================= -->
 <div class="grid">
-
 <div class="card">
 <h2>📦 Parts Control</h2>
 <p>AOG: <span class="badge">GOOD</span></p>
 <p>Issued: <span class="badge">GOOD</span></p>
 <p>Available: <span class="badge">GOOD</span></p>
 </div>
-
-<div class="card">
-<h2>📋 Tally Sheet</h2>
-<table>
-<thead>
-<tr>
-<th>Item</th>
-<th>Reference</th>
-<th>Status</th>
-</tr>
-</thead>
-<tbody id="tallyBody"></tbody>
-</table>
-</div>
-
 </div>
 
 </div>
@@ -213,17 +211,25 @@ th{ background:#e5e7eb; }
 let inspections=[];
 let tasks=[];
 
-function addInspections(){
-  const sel=document.getElementById("inspectionSelect");
-  [...sel.selectedOptions].forEach(o=>{
-    inspections.push({ name:o.value, done:false });
-  });
-  render();
+function startMaintenance(){
+  inspections=[];
+  document.querySelectorAll('#pageSetup input[type=checkbox]:checked')
+    .forEach(c=>inspections.push(c.value));
+
+  document.getElementById("tbReg").innerText = reg.value;
+  document.getElementById("tbTT").innerText = tt.value;
+  document.getElementById("tbTC").innerText = tc.value;
+  document.getElementById("tbInsp").innerText = inspections.join(", ");
+
+  document.getElementById("pageSetup").classList.add("hidden");
+  document.getElementById("pageMain").classList.remove("hidden");
+  document.getElementById("topBar").classList.remove("hidden");
+
+  renderTally();
 }
 
 function addTask(){
   if(!taskTitle.value) return;
-
   tasks.push({
     title:taskTitle.value,
     type:taskType.value,
@@ -231,53 +237,39 @@ function addTask(){
     nrc:nrc.value,
     done:false
   });
-
   taskTitle.value="";
   nrc.value="";
-  render();
+  renderTally();
 }
 
-function markDone(){
+function markLastDone(){
   if(tasks.length===0) return;
   tasks[tasks.length-1].done=true;
-  render();
+  renderTally();
 }
 
-function render(){
-  const tb=document.getElementById("taskBody");
-  tb.innerHTML="";
-  tasks.forEach((t,i)=>{
-    tb.innerHTML+=`
+function renderTally(){
+  const t=document.getElementById("tallyBody");
+  t.innerHTML="";
+  let i=1;
+
+  inspections.forEach(ins=>{
+    t.innerHTML+=`
     <tr>
-      <td>${i+1}</td>
-      <td>${t.title}</td>
-      <td>${t.type}</td>
-      <td>${t.section}</td>
-      <td class="${t.done?'done':'notdone'}">
-        ${t.done?'✔':'❌'}
+      <td>${i++}</td>
+      <td>${ins} Inspection</td>
+      <td>❌</td>
+    </tr>`;
+  });
+
+  tasks.forEach(ts=>{
+    t.innerHTML+=`
+    <tr>
+      <td>${i++}</td>
+      <td>${ts.type==="Non-Routine" ? "NRC "+ts.nrc+" – ":""}${ts.title}</td>
+      <td class="${ts.done?'done':'notdone'}">
+        ${ts.done?'✔':'❌'}
       </td>
-    </tr>`;
-  });
-
-  const tally=document.getElementById("tallyBody");
-  tally.innerHTML="";
-  let n=1;
-
-  inspections.forEach(i=>{
-    tally.innerHTML+=`
-    <tr>
-      <td>${n++}</td>
-      <td>${i.name} Inspection</td>
-      <td>${i.done?'✔':'❌'}</td>
-    </tr>`;
-  });
-
-  tasks.forEach(t=>{
-    tally.innerHTML+=`
-    <tr>
-      <td>${n++}</td>
-      <td>${t.type==="Non-Routine" ? "NRC "+t.nrc+" – ":""}${t.title}</td>
-      <td>${t.done?'✔':'❌'}</td>
     </tr>`;
   });
 }
