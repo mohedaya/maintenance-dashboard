@@ -1,81 +1,43 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>AW139 Maintenance Dashboard</title>
+{
+  "aircraft_type": "AW139",
 
-<style>
-body { font-family: Arial; background:#f4f6f8; padding:20px; }
-.card { background:#fff; padding:15px; margin-bottom:15px; border-radius:6px; }
-h2 { margin-top:0; }
-.task { border-bottom:1px solid #ddd; padding:8px 0; }
-small { color:#666; }
-</style>
-</head>
+  "inspections": {
+    "100 HRS": {
+      "sections": {
+        "FUSELAGE": [
+          {
+            "id": "100-FUS-01",
+            "title": "General fuselage visual inspection",
+            "routine": true
+          }
+        ],
+        "ENGINE": [
+          {
+            "id": "100-ENG-01",
+            "title": "Check engine oil leaks",
+            "routine": true
+          }
+        ],
+        "MAIN ROTOR": [
+          {
+            "id": "100-MR-01",
+            "title": "Inspect main rotor head",
+            "routine": true
+          }
+        ]
+      }
+    },
 
-<body>
-
-<h1>Maintenance Dashboard</h1>
-
-<div class="card">
-  <h2>Select Inspection</h2>
-  <select id="inspectionSelect"></select>
-  <button onclick="loadInspection()">Load</button>
-</div>
-
-<div class="card">
-  <h2>Tasks</h2>
-  <div id="tasks"></div>
-  <h3 id="progress"></h3>
-</div>
-
-<script>
-let library;
-
-fetch("inspection_library.json")
-  .then(r => r.json())
-  .then(d => {
-    library = d;
-    const sel = document.getElementById("inspectionSelect");
-    Object.keys(d.inspections).forEach(i => {
-      const o = document.createElement("option");
-      o.value = i;
-      o.textContent = i;
-      sel.appendChild(o);
-    });
-  });
-
-function loadInspection() {
-  const name = document.getElementById("inspectionSelect").value;
-  const tasks = library.inspections[name].tasks;
-  const div = document.getElementById("tasks");
-  div.innerHTML = "";
-
-  tasks.forEach((t,i) => {
-    div.innerHTML += `
-      <div class="task">
-        <strong>${t.section}</strong> — ${t.title}<br>
-        MH: <input type="number" value="${t.man_hours}" 
-          onchange="tasks[${i}].man_hours=this.value">
-        <label>
-          <input type="checkbox" onchange="tasks[${i}].done=this.checked">
-          Done
-        </label>
-        <small>(${t.type})</small>
-      </div>
-    `;
-  });
-
-  updateProgress(tasks);
+    "ENGINE 600 HRS": {
+      "sections": {
+        "ENGINE": [
+          {
+            "id": "E600-01",
+            "title": "600 HRS engine inspection",
+            "routine": true
+          }
+        ]
+      }
+    }
+  }
 }
-
-function updateProgress(tasks) {
-  const done = tasks.filter(t => t.done).length;
-  const pct = Math.round((done / tasks.length) * 100);
-  document.getElementById("progress").innerText =
-    `Inspection Progress: ${pct}%`;
-}
-</script>
-
-</body>
-</html>
