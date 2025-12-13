@@ -1,82 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Inspection Selection</title>
+  <meta charset="UTF-8">
+  <title>Start Inspection Work Package</title>
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
-  padding: 20px;
-}
-.card {
-  background: white;
-  padding: 15px;
-  margin-bottom: 15px;
-  border-radius: 6px;
-}
-label {
-  display: block;
-  margin: 6px 0;
-}
-button {
-  padding: 10px 15px;
-  font-size: 14px;
-  cursor: pointer;
-}
-</style>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .section {
+      background: white;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+    }
+
+    label {
+      display: block;
+      margin: 4px 0;
+    }
+
+    input[type="text"] {
+      width: 150px;
+      padding: 4px;
+      margin-bottom: 6px;
+    }
+
+    button {
+      padding: 8px 14px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
 
 <h1>Start Inspection Work Package</h1>
 
-<div class="card">
+<div class="section">
   <h3>Aircraft Information</h3>
-  <label>A/C Reg <input id="reg"></label>
-  <label>TT <input id="tt"></label>
-  <label>TC <input id="tc"></label>
-  <label>S/N <input id="sn"></label>
+  <label>A/C Reg <input type="text"></label>
+  <label>TT <input type="text"></label>
+  <label>TC <input type="text"></label>
+  <label>S/N <input type="text"></label>
 </div>
 
-<div class="card">
+<div class="section">
   <h3>Select Required Inspections</h3>
-  <label><input type="checkbox" value="50 HRS"> 50 HRS</label>
-  <label><input type="checkbox" value="100 HRS"> 100 HRS</label>
-  <label><input type="checkbox" value="300 HRS"> 300 HRS</label>
-  <label><input type="checkbox" value="600 HRS"> 600 HRS</label>
-  <label><input type="checkbox" value="1200 HRS"> 1200 HRS</label>
-  <label><input type="checkbox" value="1 YEAR"> 1 YEAR</label>
-  <label><input type="checkbox" value="2 YEAR"> 2 YEAR</label>
-  <label><input type="checkbox" value="4 YEAR"> 4 YEAR</label>
+
+  <label><input type="checkbox" value="AW139_50_HOUR_CHECK.pdf"> 50 HRS</label>
+  <label><input type="checkbox" value="AW139_100_HOUR_CHECK.pdf"> 100 HRS</label>
+  <label><input type="checkbox" value="AW139_300_HOUR_CHECK.pdf"> 300 HRS</label>
+  <label><input type="checkbox" value="AW139_600_HOUR_CHECK.pdf"> 600 HRS</label>
+  <label><input type="checkbox" value="AW139_1200_HOUR_CHECK.pdf"> 1200 HRS</label>
 
   <hr>
 
-  <label><input type="checkbox" value="ENGINE 300 HRS FUEL NOZZLE CHANGE"> Engine 300 HRS Fuel Nozzle</label>
-  <label><input type="checkbox" value="ENGINE 600 HRS FUEL NOZZLE CHANGE"> Engine 600 HRS Fuel Nozzle</label>
-  <label><input type="checkbox" value="ENGINE 600 HRS INSPECTION"> Engine 600 HRS Inspection</label>
-  <label><input type="checkbox" value="ENGINE 900 HRS INSPECTION"> Engine 900 HRS Inspection</label>
+  <label><input type="checkbox" value="AW139_1_YEAR_CHECK.pdf"> 1 YEAR</label>
+  <label><input type="checkbox" value="AW139_2_YEAR_CHECK.pdf"> 2 YEAR</label>
+  <label><input type="checkbox" value="AW139_4_YEAR_CHECK.pdf"> 4 YEAR</label>
+
+  <hr>
+
+  <label><input type="checkbox" value="Engine_300_HOUR_FUEL_NOZZLE_CHANGE.pdf"> Engine 300 HRS Fuel Nozzle</label>
+  <label><input type="checkbox" value="Engine_600_HOUR_FUEL_NOZZLE_CHANGE.pdf"> Engine 600 HRS Fuel Nozzle</label>
+  <label><input type="checkbox" value="Engine_600_HOUR_INSPECTION.pdf"> Engine 600 HRS Inspection</label>
+  <label><input type="checkbox" value="Engine_900_HOUR_INSPECTION.pdf"> Engine 900 HRS Inspection</label>
 </div>
 
-<button onclick="startPackage()">Start Work Package</button>
+<button onclick="startWorkPackage()">Start Work Package</button>
 
 <script>
-function startPackage() {
-  const selected = [...document.querySelectorAll('input[type=checkbox]:checked')]
-    .map(cb => cb.value);
+function startWorkPackage() {
+  const checked = document.querySelectorAll('input[type="checkbox"]:checked');
 
-  const aircraft = {
-    reg: document.getElementById('reg').value,
-    tt: document.getElementById('tt').value,
-    tc: document.getElementById('tc').value,
-    sn: document.getElementById('sn').value
-  };
+  if (checked.length === 0) {
+    alert("Please select at least one inspection");
+    return;
+  }
 
-  localStorage.setItem('aircraftInfo', JSON.stringify(aircraft));
-  localStorage.setItem('selectedInspections', JSON.stringify(selected));
-
-  alert('Work Package Created');
+  checked.forEach(cb => {
+    const pdfPath = `inspection-library/pdf/${cb.value}`;
+    window.open(pdfPath, "_blank");
+  });
 }
 </script>
 
