@@ -221,6 +221,18 @@ function updateTally() {
     ul.appendChild(li);
   });
 }
+  async function openInspectionPDF(inspectionKey) {
+  const res = await fetch("inspection_library.json");
+  const data = await res.json();
+
+  const insp = data.aircraft_inspections[inspectionKey];
+  if (!insp || !insp.pdf) {
+    alert("PDF not found");
+    return;
+  }
+
+  window.open(insp.pdf, "_blank");
+}
 </script>
 
 </body>
