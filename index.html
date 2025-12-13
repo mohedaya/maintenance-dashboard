@@ -1,96 +1,79 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Start Inspection Work Package</title>
+<meta charset="UTF-8">
+<title>AW139 Maintenance Dashboard</title>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      padding: 20px;
-    }
-
-    h1 {
-      margin-bottom: 10px;
-    }
-
-    .section {
-      background: white;
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 6px;
-    }
-
-    label {
-      display: block;
-      margin: 4px 0;
-    }
-
-    input[type="text"] {
-      width: 150px;
-      padding: 4px;
-      margin-bottom: 6px;
-    }
-
-    button {
-      padding: 8px 14px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-  </style>
+<style>
+body { font-family: Arial; background:#f4f6f8; padding:20px; }
+.card { background:#fff; padding:15px; margin-bottom:15px; border-radius:6px; }
+h2 { margin-top:0; }
+.task { border-bottom:1px solid #ddd; padding:8px 0; }
+small { color:#666; }
+</style>
 </head>
 
 <body>
 
-<h1>Start Inspection Work Package</h1>
+<h1>Maintenance Dashboard</h1>
 
-<div class="section">
-  <h3>Aircraft Information</h3>
-  <label>A/C Reg <input type="text"></label>
-  <label>TT <input type="text"></label>
-  <label>TC <input type="text"></label>
-  <label>S/N <input type="text"></label>
+<div class="card">
+  <h2>Select Inspection</h2>
+  <select id="inspectionSelect"></select>
+  <button onclick="loadInspection()">Load</button>
 </div>
 
-<div class="section">
-  <h3>Select Required Inspections</h3>
-
-  <label><input type="checkbox" value="AW139_50_HOUR_CHECK.pdf"> 50 HRS</label>
-  <label><input type="checkbox" value="AW139_100_HOUR_CHECK.pdf"> 100 HRS</label>
-  <label><input type="checkbox" value="AW139_300_HOUR_CHECK.pdf"> 300 HRS</label>
-  <label><input type="checkbox" value="AW139_600_HOUR_CHECK.pdf"> 600 HRS</label>
-  <label><input type="checkbox" value="AW139_1200_HOUR_CHECK.pdf"> 1200 HRS</label>
-
-  <hr>
-
-  <label><input type="checkbox" value="AW139_1_YEAR_CHECK.pdf"> 1 YEAR</label>
-  <label><input type="checkbox" value="AW139_2_YEAR_CHECK.pdf"> 2 YEAR</label>
-  <label><input type="checkbox" value="AW139_4_YEAR_CHECK.pdf"> 4 YEAR</label>
-
-  <hr>
-
-  <label><input type="checkbox" value="Engine_300_HOUR_FUEL_NOZZLE_CHANGE.pdf"> Engine 300 HRS Fuel Nozzle</label>
-  <label><input type="checkbox" value="Engine_600_HOUR_FUEL_NOZZLE_CHANGE.pdf"> Engine 600 HRS Fuel Nozzle</label>
-  <label><input type="checkbox" value="Engine_600_HOUR_INSPECTION.pdf"> Engine 600 HRS Inspection</label>
-  <label><input type="checkbox" value="Engine_900_HOUR_INSPECTION.pdf"> Engine 900 HRS Inspection</label>
+<div class="card">
+  <h2>Tasks</h2>
+  <div id="tasks"></div>
+  <h3 id="progress"></h3>
 </div>
-
-<button onclick="startWorkPackage()">Start Work Package</button>
 
 <script>
-function startWorkPackage() {
-  const checked = document.querySelectorAll('input[type="checkbox"]:checked');
+let library;
 
-  if (checked.length === 0) {
-    alert("Please select at least one inspection");
-    return;
-  }
-
-  checked.forEach(cb => {
-    const pdfPath = `inspection-library/pdf/${cb.value}`;
-    window.open(pdfPath, "_blank");
+fetch("inspection_library.json")
+  .then(r => r.json())
+  .then(d => {
+    library = d;
+    const sel = document.getElementById("inspectionSelect");
+    Object.keys(d.inspections).forEach(i => {
+      const o = document.createElement("option");
+      o.value = i;
+      o.textContent = i;
+      sel.appendChild(o);
+    });
   });
+
+function loadInspection() {
+  const name = document.getElementById("inspectionSelect").value;
+  const tasks = library.inspections[name].tasks;
+  const div = document.getElementById("tasks");
+  div.innerHTML = "";
+
+  tasks.forEach((t,i) => {
+    div.innerHTML += `
+      <div class="task">
+        <strong>${t.section}</strong> — ${t.title}<br>
+        MH: <input type="number" value="${t.man_hours}" 
+          onchange="tasks[${i}].man_hours=this.value">
+        <label>
+          <input type="checkbox" onchange="tasks[${i}].done=this.checked">
+          Done
+        </label>
+        <small>(${t.type})</small>
+      </div>
+    `;
+  });
+
+  updateProgress(tasks);
+}
+
+function updateProgress(tasks) {
+  const done = tasks.filter(t => t.done).length;
+  const pct = Math.round((done / tasks.length) * 100);
+  document.getElementById("progress").innerText =
+    `Inspection Progress: ${pct}%`;
 }
 </script>
 
