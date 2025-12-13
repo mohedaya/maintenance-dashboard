@@ -16,20 +16,17 @@ header{background:#1e293b;color:#fff;padding:12px 16px;display:flex;justify-cont
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:900px){.grid{grid-template-columns:1fr}}
 label{font-weight:bold;font-size:13px;margin-top:6px;display:block}
-input,select,textarea{width:100%;padding:7px;margin-top:4px;border-radius:8px;border:1px solid #cbd5e1}
+input,select{width:100%;padding:6px;margin-top:4px;border-radius:8px;border:1px solid #cbd5e1}
 button{padding:8px 12px;border-radius:8px;border:none;background:#2563eb;color:#fff;font-weight:bold;cursor:pointer}
 button:hover{background:#1d4ed8}
 table{width:100%;border-collapse:collapse;margin-top:8px}
 th,td{border:1px solid #cbd5e1;padding:6px;font-size:12px}
 th{background:#e5e7eb}
 .small{font-size:12px;color:#64748b}
-.click{cursor:pointer}
-.click:hover{background:#f1f5f9}
-.status{padding:2px 8px;border-radius:999px;font-size:11px;font-weight:bold}
-.req{background:#ffedd5;color:#9a3412}
-.iss{background:#dbeafe;color:#1e3a8a}
-.ins{background:#dcfce7;color:#166534}
-.aog{background:#fee2e2;color:#991b1b}
+.bar{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+.bar div{height:100%;background:#2563eb}
+.over{background:#fee2e2!important}
+.ok{background:#dcfce7!important}
 </style>
 </head>
 
@@ -57,10 +54,6 @@ th{background:#e5e7eb}
 <label>Aircraft Inspections</label>
 <label><input type="checkbox" value="100 HRS" class="cbAir"> 100 HRS</label>
 <label><input type="checkbox" value="4 YEAR" class="cbAir"> 4 YEAR</label>
-
-<label style="margin-top:10px">
-<input type="checkbox" id="includeRoutine"> Include Routine Tasks
-</label>
 </div>
 </div>
 
@@ -78,8 +71,8 @@ th{background:#e5e7eb}
 </div>
 
 <div class="card">
-<h3>👥 Team Progress</h3>
-<div id="teamProg"></div>
+<h3>⏱ Man-Hours (Management)</h3>
+<div id="mhGauge"></div>
 </div>
 </div>
 
@@ -87,44 +80,22 @@ th{background:#e5e7eb}
 <div class="card">
 <h3>🧾 Summary</h3>
 <table>
-<thead><tr><th>Item</th><th>Progress</th></tr></thead>
+<thead><tr><th>Inspection</th><th>Progress</th></tr></thead>
 <tbody id="summary"></tbody>
 </table>
 </div>
 
 <div class="card">
-<h3>📦 Parts & Consumables</h3>
-<button onclick="exportAOG()" style="margin-bottom:8px;background:#dc2626">
-Export AOG Report
-</button>
-<table>
-<thead>
-<tr>
-<th>Inspection</th>
-<th>Item #</th>
-<th>Section</th>
-<th>Task</th>
-<th>P/N</th>
-<th>Desc</th>
-<th>Qty</th>
-<th>Status</th>
-</tr>
-</thead>
-<tbody id="partsTable"></tbody>
-</table>
-</div>
-</div>
-
-<div class="card" style="margin-top:16px">
-<h3>🔍 Details</h3>
+<h3>🔍 Details (Tasks)</h3>
 <div id="details" class="small">Select inspection</div>
+</div>
 </div>
 
 </div>
 
 <script>
 let items=[],tasks=[];
-let SECTIONS=["Fuselage","MR","TR","Engine","Avionics"];
+const SECTIONS=["Fuselage","MR","TR","Engine","Avionics"];
 
 function uid(){return Math.random().toString(36).slice(2,9)}
 
@@ -139,7 +110,7 @@ items=[];tasks=[];
 document.querySelectorAll(".cbAir:checked").forEach(c=>{
 let pid=uid();
 items.push({id:pid,label:c.value});
-["Fuselage","Engine"].forEach((sec,i)=>{
+["Fuselage","Engine","MR"].forEach((sec,i)=>{
 tasks.push({
 id:uid(),
 parent:pid,
@@ -148,7 +119,8 @@ itemNo:i+1,
 section:sec,
 title:`${sec} inspection task`,
 done:false,
-parts:[]
+plannedMH:2,
+actualMH:0
 });
 });
 });
@@ -163,16 +135,16 @@ function render(){
 summary.innerHTML="";
 items.forEach(it=>{
 let st=tasks.filter(t=>t.parent===it.id);
-let d=st.filter(t=>t.done).length;
-let p=st.length?Math.round(d/st.length*100):0;
+let done=st.filter(t=>t.done).length;
+let p=Math.round(done/st.length*100);
 summary.innerHTML+=`
-<tr class="click" onclick="openDetails('${it.id}')">
+<tr onclick="openDetails('${it.id}')">
 <td><b>${it.label}</b></td>
-<td>${p}%</td>
+<td>${p}%<div class="bar"><div style="width:${p}%"></div></div></td>
 </tr>`;
 });
-renderParts();
-renderProg();
+renderMH();
+renderInsp();
 }
 
 function openDetails(id){
@@ -181,89 +153,48 @@ tasks.filter(t=>t.parent===id).forEach(t=>{
 html+=`
 <div class="card" style="margin-bottom:10px">
 <b>Item ${t.itemNo} – ${t.section}</b><br>
-${t.title}<br>
+${t.title}
 
-<label><input type="checkbox" ${t.done?"checked":""}
-onchange="t.done=this.checked;render()"> Task Done</label>
+<label>Planned MH</label>
+<input type="number" value="${t.plannedMH}"
+onchange="t.plannedMH=+this.value;render()">
 
-<label>Add Part</label>
-<div class="grid">
-<input placeholder="P/N" id="pn_${t.id}">
-<input placeholder="Description" id="ds_${t.id}">
-<input type="number" placeholder="Qty" id="qt_${t.id}">
-<select id="st_${t.id}">
-<option>Requested</option>
-<option>Issued</option>
-<option>Installed</option>
-<option>AOG</option>
-</select>
-</div>
-<button onclick="addPart('${t.id}')">Add</button>
+<label>Actual MH</label>
+<input type="number" value="${t.actualMH}"
+onchange="t.actualMH=+this.value;render()">
+
+<label>
+<input type="checkbox" ${t.done?"checked":""}
+onchange="t.done=this.checked;render()"> Task Done
+</label>
 </div>`;
 });
 details.innerHTML=html;
 }
 
-function addPart(tid){
-let t=tasks.find(x=>x.id===tid);
-let p={
-pn:document.getElementById("pn_"+tid).value,
-desc:document.getElementById("ds_"+tid).value,
-qty:+document.getElementById("qt_"+tid).value||1,
-status:document.getElementById("st_"+tid).value
-};
-t.parts.push(p);
-render();
+function renderMH(){
+let p=tasks.reduce((a,t)=>a+t.plannedMH,0);
+let a=tasks.reduce((a,t)=>a+t.actualMH,0);
+let d=a-p;
+
+mhGauge.innerHTML=`
+<p><b>Planned MH:</b> ${p.toFixed(1)}</p>
+<p><b>Actual MH:</b> ${a.toFixed(1)}</p>
+<p><b>Delta:</b> ${d>=0?"+":""}${d.toFixed(1)}</p>
+<div class="bar ${a>p?"over":"ok"}">
+<div style="width:${p?Math.min(a/p*100,100):0}%"></div>
+</div>`;
 }
 
-function renderParts(){
-partsTable.innerHTML="";
-tasks.forEach(t=>{
-t.parts.forEach(p=>{
-partsTable.innerHTML+=`
-<tr>
-<td>${t.inspection}</td>
-<td>${t.itemNo}</td>
-<td>${t.section}</td>
-<td>${t.title}</td>
-<td>${p.pn}</td>
-<td>${p.desc}</td>
-<td>${p.qty}</td>
-<td class="status ${p.status==="AOG"?"aog":""}">${p.status}</td>
-</tr>`;
-});
-});
-}
-
-function renderProg(){
+function renderInsp(){
 inspProg.innerHTML="";
 items.forEach(it=>{
 let st=tasks.filter(t=>t.parent===it.id);
-inspProg.innerHTML+=`<p>${it.label}: ${st.filter(t=>t.done).length}/${st.length}</p>`;
+let pMH=st.reduce((a,t)=>a+t.plannedMH,0);
+let aMH=st.reduce((a,t)=>a+t.actualMH,0);
+inspProg.innerHTML+=`
+<p>${it.label} — Planned ${pMH} MH | Actual ${aMH} MH</p>`;
 });
-teamProg.innerHTML="";
-SECTIONS.forEach(s=>{
-let st=tasks.filter(t=>t.section===s);
-teamProg.innerHTML+=`<p>${s}: ${st.filter(t=>t.done).length}/${st.length}</p>`;
-});
-}
-
-function exportAOG(){
-let map={};
-tasks.forEach(t=>{
-t.parts.filter(p=>p.status==="AOG").forEach(p=>{
-map[p.pn]=(map[p.pn]||0)+p.qty;
-});
-});
-let csv="PN,Quantity\n";
-Object.keys(map).forEach(pn=>{
-csv+=`${pn},${map[pn]}\n`;
-});
-let blob=new Blob([csv],{type:"text/csv"});
-let a=document.createElement("a");
-a.href=URL.createObjectURL(blob);
-a.download="AOG_Report.csv";
-a.click();
 }
 </script>
 
