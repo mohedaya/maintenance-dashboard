@@ -1,18 +1,48 @@
 {
   "aircraft": "AW139",
-  "inspections": [
-    { "name": "50 HRS", "pdf": "inspection-library/pdf/AW139_50_HOUR_CHECK.pdf" },
-    { "name": "100 HRS", "pdf": "inspection-library/pdf/AW139_100_HOUR_CHECK.pdf" },
-    { "name": "300 HRS", "pdf": "inspection-library/pdf/AW139_300_HOUR_CHECK.pdf" },
-    { "name": "600 HRS", "pdf": "inspection-library/pdf/AW139_600_HOUR_CHECK.pdf" },
-    { "name": "1200 HRS", "pdf": "inspection-library/pdf/AW139_1200_HOUR_CHECK.pdf" },
-    { "name": "1 YEAR", "pdf": "inspection-library/pdf/AW139_1_YEAR_CHECK.pdf" },
-    { "name": "2 YEAR", "pdf": "inspection-library/pdf/AW139_2_YEAR_CHECK.pdf" },
-    { "name": "4 YEAR", "pdf": "inspection-library/pdf/AW139_4_YEAR_CHECK.pdf" },
+  "teams": ["FUSELAGE", "ENGINE", "MR", "TR", "AVIONICS"],
 
-    { "name": "ENGINE 300 HRS FUEL NOZZLE CHANGE", "pdf": "inspection-library/pdf/Engine_300_HOUR_FUEL_NOZZLE_CHANGE.pdf" },
-    { "name": "ENGINE 600 HRS FUEL NOZZLE CHANGE", "pdf": "inspection-library/pdf/Engine_600_HOUR_FUEL_NOZZLE_CHANGE.pdf" },
-    { "name": "ENGINE 600 HRS INSPECTION", "pdf": "inspection-library/pdf/Engine_600_HOUR_CHECK.pdf" },
-    { "name": "ENGINE 900 HRS INSPECTION", "pdf": "inspection-library/pdf/Engine_900_HOUR_CHECK.pdf" }
-  ]
+  "inspections": {
+    "100 HRS": {
+      "tasks": [
+        {
+          "id": "100-FUS-01",
+          "section": "FUSELAGE",
+          "title": "General fuselage visual inspection",
+          "man_hours": 0,
+          "done": false,
+          "type": "ROUTINE"
+        },
+        {
+          "id": "100-ENG-01",
+          "section": "ENGINE",
+          "title": "Check engine oil leaks",
+          "man_hours": 0,
+          "done": false,
+          "type": "ROUTINE"
+        },
+        {
+          "id": "100-MR-01",
+          "section": "MR",
+          "title": "Inspect main rotor head",
+          "man_hours": 0,
+          "done": false,
+          "type": "ROUTINE"
+        }
+      ]
+    },
+
+    "ENGINE 600 HRS": {
+      "tasks": [
+        {
+          "id": "E600-01",
+          "section": "ENGINE",
+          "title": "600 HRS engine inspection",
+          "man_hours": 0,
+          "done": false,
+          "type": "ROUTINE"
+        }
+      ]
+    }
+  }
 }
