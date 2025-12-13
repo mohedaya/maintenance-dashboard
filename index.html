@@ -3,140 +3,111 @@
 <head>
 <meta charset="UTF-8">
 <title>Helicopter Maintenance Dashboard</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
 <style>
-body{margin:0;font-family:Arial;background:#f4f6f9}
-.hidden{display:none}
-header{background:#1e293b;color:#fff;padding:12px 16px;display:flex;justify-content:space-between}
-.container{padding:16px}
-.card{background:#fff;padding:14px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:900px){.grid{grid-template-columns:1fr}}
-label{font-weight:bold;font-size:13px;margin-top:6px;display:block}
-input{width:100%;padding:6px;margin-top:4px;border-radius:8px;border:1px solid #cbd5e1}
-button{padding:8px 12px;border-radius:8px;border:none;background:#2563eb;color:#fff;font-weight:bold;cursor:pointer}
-table{width:100%;border-collapse:collapse;margin-top:8px}
-th,td{border:1px solid #cbd5e1;padding:6px;font-size:12px}
-th{background:#e5e7eb}
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  margin:0;
+  padding:20px;
+}
+h2{margin-top:0}
+.card{
+  background:#fff;
+  padding:15px;
+  margin-bottom:15px;
+  border-radius:8px;
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+.task{
+  border-bottom:1px solid #ddd;
+  padding:10px 0;
+}
+.task:last-child{border-bottom:none}
+label{font-weight:bold}
+input[type=number]{width:70px}
+.total{
+  font-size:18px;
+  font-weight:bold;
+  color:#0b7;
+}
 </style>
 </head>
 
 <body>
 
-<header id="topBar" class="hidden">
-  <div><b id="tbReg"></b> | S/N <span id="tbSN"></span></div>
-  <div>Total MH: <b id="totalMH">0</b></div>
-</header>
+<h2>Helicopter Maintenance Dashboard</h2>
 
-<!-- PAGE 1 -->
-<div id="pageSetup" class="container">
+<!-- ================= MAN HOURS SUMMARY ================= -->
 <div class="card">
-<h2>📌 Data Entry</h2>
-
-<label>Aircraft Registration</label><input id="reg">
-<label>Serial Number</label><input id="sn">
-
-<label>Inspection Package</label>
-<label><input type="checkbox" class="pkg" value="100 HRS"> 100 HRS</label>
-<label><input type="checkbox" class="pkg" value="4 YEAR"> 4 YEAR</label>
-
-<br>
-<button onclick="start()">▶ Start Work</button>
-</div>
+  <h3>⏱ Man-Hours (Management)</h3>
+  <div>Total Actual MH: <span class="total" id="totalMH">0.0</span></div>
 </div>
 
-<!-- PAGE 2 -->
-<div id="pageMain" class="container hidden">
-
-<div class="grid">
+<!-- ================= TASK DETAILS ================= -->
 <div class="card">
-<h3>⏱ Man-Hours Summary</h3>
-<table>
-<thead><tr><th>Inspection</th><th>Total MH</th></tr></thead>
-<tbody id="mhSummary"></tbody>
-</table>
-</div>
-
-<div class="card">
-<h3>🧾 Tasks</h3>
-<div id="taskList">Select inspection</div>
-</div>
-</div>
-
+  <h3>📋 Tasks</h3>
+  <div id="taskList"></div>
 </div>
 
 <script>
-let inspections=[],tasks=[];
+/* ===================== DATA ===================== */
 
-function uid(){return Math.random().toString(36).slice(2,9)}
+const tasks = [
+  { id:"T1", name:"Fuselage Inspection", section:"Fuselage", mh:0, done:false },
+  { id:"T2", name:"Engine Inspection", section:"Engine", mh:0, done:false },
+  { id:"T3", name:"Main Rotor Inspection", section:"MR", mh:0, done:false },
+  { id:"T4", name:"Tail Rotor Inspection", section:"TR", mh:0, done:false },
+  { id:"T5", name:"Avionics Check", section:"Avionics", mh:0, done:false }
+];
 
-function start(){
-tbReg.textContent=reg.value;
-tbSN.textContent=sn.value;
+/* ===================== FUNCTIONS ===================== */
 
-inspections=[];tasks=[];
+function updateMH(taskId, value){
+  const t = tasks.find(x => x.id === taskId);
+  if(t){
+    t.mh = Number(value) || 0;
+    render();
+  }
+}
 
-document.querySelectorAll(".pkg:checked").forEach(p=>{
-let pid=uid();
-inspections.push({id:pid,label:p.value});
-["Fuselage","Engine","MR","TR","Avionics"].forEach((sec,i)=>{
-tasks.push({
-id:uid(),
-parent:pid,
-inspection:p.value,
-item:i+1,
-section:sec,
-title:`${sec} task`,
-mh:0,
-done:false
-});
-});
-});
-
-pageSetup.classList.add("hidden");
-pageMain.classList.remove("hidden");
-topBar.classList.remove("hidden");
-render();
+function toggleDone(taskId, checked){
+  const t = tasks.find(x => x.id === taskId);
+  if(t){
+    t.done = checked;
+    render();
+  }
 }
 
 function render(){
-mhSummary.innerHTML="";
-let total=0;
+  // Render task list
+  let html = "";
+  tasks.forEach(t=>{
+    html += `
+      <div class="task">
+        <div><b>${t.name}</b> <small>(${t.section})</small></div>
+        <div>
+          Actual MH:
+          <input type="number" min="0" step="0.1"
+            value="${t.mh}"
+            onchange="updateMH('${t.id}', this.value)">
+          &nbsp;&nbsp;
+          Done:
+          <input type="checkbox"
+            ${t.done ? "checked" : ""}
+            onchange="toggleDone('${t.id}', this.checked)">
+        </div>
+      </div>
+    `;
+  });
+  document.getElementById("taskList").innerHTML = html;
 
-inspections.forEach(i=>{
-let sum=tasks.filter(t=>t.parent===i.id)
-.reduce((a,t)=>a+t.mh,0);
-total+=sum;
-mhSummary.innerHTML+=`
-<tr onclick="openTasks('${i.id}')">
-<td>${i.label}</td>
-<td>${sum.toFixed(1)}</td>
-</tr>`;
-});
-
-totalMH.textContent=total.toFixed(1);
+  // Calculate total MH
+  const total = tasks.reduce((s,t)=>s+t.mh,0);
+  document.getElementById("totalMH").textContent = total.toFixed(1);
 }
 
-function openTasks(id){
-let html="";
-tasks.filter(t=>t.parent===id).forEach(t=>{
-html+=`
-<div class="card" style="margin-bottom:8px">
-<b>${t.section}</b> – ${t.title}
-<label>Actual Man-Hours</label>
-<input type="number" value="${t.mh}"
-onchange="t.mh=+this.value;render()">
-<label>
-<input type="checkbox" ${t.done?"checked":""}
-onchange="t.done=this.checked"> Task Done
-</label>
-</div>`;
-});
-taskList.innerHTML=html;
-}
+/* ===================== INIT ===================== */
+render();
 </script>
 
 </body>
