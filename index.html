@@ -2,241 +2,93 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Helicopter Maintenance Dashboard</title>
+<title>AW139 Maintenance Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
 body {
-  <h3>Inspection Library</h3>
-
-<button onclick="openInspectionPDF('100 HRS')">
-  Open 100 HRS Inspection PDF
-</button>
   font-family: Arial, sans-serif;
-  margin: 0;
   background: #f4f6f8;
-}
-header {
-  background: #1f2937;
-  color: white;
-  padding: 15px;
-}
-h1 { margin: 0; font-size: 20px; }
-
-.container {
+  margin: 0;
   padding: 20px;
 }
+h1 {
+  margin-top: 0;
+}
 .card {
-  background: white;
+  background: #ffffff;
   padding: 15px;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 button {
-  padding: 6px 10px;
-  margin-top: 5px;
-  cursor: pointer;
-}
-input, select {
-  padding: 5px;
-  margin: 3px;
-}
-.hidden { display: none; }
-
-.inspection {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px;
+  margin-top: 6px;
   border: 1px solid #ccc;
-  margin-top: 10px;
+  background: #eef2ff;
+  cursor: pointer;
   border-radius: 4px;
 }
-.inspection-header {
-  background: #e5e7eb;
-  padding: 8px;
-  cursor: pointer;
-  font-weight: bold;
-}
-.task {
-  padding: 8px;
-  border-top: 1px solid #ddd;
+button:hover {
+  background: #e0e7ff;
 }
 .small {
   font-size: 12px;
   color: #555;
-}
-.total-box {
-  background: #ecfeff;
-  padding: 10px;
-  border-radius: 6px;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  <h1>Helicopter Maintenance Dashboard</h1>
-</header>
+<h1>AW139 Maintenance Dashboard</h1>
 
-<div class="container">
-
-<!-- PAGE 1 : DATA ENTRY -->
-<div class="card" id="pageSetup">
-  <h3>Aircraft Data Entry</h3>
-
-  <input id="reg" placeholder="A/C Registration">
-  <input id="tt" placeholder="TT">
-  <input id="tc" placeholder="TC">
-  <input id="sn" placeholder="S/N">
-
-  <h4>Select Required Inspections</h4>
-  <label><input type="checkbox" value="100 HRS"> 100 HRS</label><br>
-  <label><input type="checkbox" value="300 HRS"> 300 HRS</label><br>
-  <label><input type="checkbox" value="600 HRS"> 600 HRS</label><br>
-  <label><input type="checkbox" value="1 YEAR"> 1 YEAR</label><br>
-  <label><input type="checkbox" value="2 YEAR"> 2 YEAR</label><br>
-  <label><input type="checkbox" value="4 YEAR"> 4 YEAR</label>
-
-  <br><br>
-  <button onclick="startWork()">Start Work Package</button>
+<div class="card">
+  <h2>Aircraft Inspections</h2>
+  <div id="aircraftInspections" class="small">Loading…</div>
 </div>
 
-<!-- PAGE 2 : MAIN -->
-<div id="pageMain" class="hidden">
-
-  <!-- SUMMARY -->
-  <div class="card total-box">
-    <b>Total Actual Man-Hours:</b>
-    <span id="totalMH">0</span>
-  </div>
-
-  <!-- INSPECTIONS -->
-  <div class="card">
-    <h3>Inspections</h3>
-    <div id="inspectionList"></div>
-  </div>
-
-  <!-- TALLY SHEET -->
-  <div class="card">
-    <h3>Tally Sheet</h3>
-    <ul id="tally"></ul>
-  </div>
-
-</div>
-
+<div class="card">
+  <h2>Engine Inspections</h2>
+  <div id="engineInspections" class="small">Loading…</div>
 </div>
 
 <script>
-const state = {
-  inspections: [],
-  totalMH: 0
-};
+fetch("inspection_library.json")
+  .then(res => res.json())
+  .then(data => {
+    loadAircraft(data.library.aircraft_inspections);
+    loadEngine(data.library.engine_inspections);
+  })
+  .catch(err => {
+    alert("Failed to load inspection library");
+    console.error(err);
+  });
 
-function startWork() {
-  document.getElementById("pageSetup").classList.add("hidden");
-  document.getElementById("pageMain").classList.remove("hidden");
-
-  const checks = document.querySelectorAll('input[type=checkbox]:checked');
-  checks.forEach(c => createInspection(c.value));
-  updateTally();
-}
-
-function createInspection(name) {
-  const insp = {
-    name,
-    tasks: []
-  };
-  state.inspections.push(insp);
-
-  const box = document.createElement("div");
-  box.className = "inspection";
-
-  const header = document.createElement("div");
-  header.className = "inspection-header";
-  header.innerText = name + " (click to open)";
-  header.onclick = () => body.classList.toggle("hidden");
-
-  const body = document.createElement("div");
-  body.className = "hidden";
-
-  const addBtn = document.createElement("button");
-  addBtn.innerText = "Add Task";
-  addBtn.onclick = () => addTask(insp, body);
-
-  body.appendChild(addBtn);
-  box.appendChild(header);
-  box.appendChild(body);
-
-  document.getElementById("inspectionList").appendChild(box);
-}
-
-function addTask(insp, body) {
-  const task = {
-    mh: 0,
-    done: false
-  };
-  insp.tasks.push(task);
-
-  const div = document.createElement("div");
-  div.className = "task";
-
-  div.innerHTML = `
-    <input placeholder="Task name">
-    <select>
-      <option>Engine</option>
-      <option>MR</option>
-      <option>TR</option>
-      <option>Fuselage</option>
-      <option>Avionics</option>
-    </select>
-    MH: <input type="number" value="0" min="0" style="width:60px">
-    Done <input type="checkbox">
-  `;
-
-  const mhInput = div.querySelector('input[type=number]');
-  const doneBox = div.querySelector('input[type=checkbox]');
-
-  mhInput.oninput = () => {
-    task.mh = Number(mhInput.value);
-    recalcMH();
-  };
-
-  doneBox.onchange = () => {
-    task.done = doneBox.checked;
-    updateTally();
-  };
-
-  body.appendChild(div);
-}
-
-function recalcMH() {
-  let total = 0;
-  state.inspections.forEach(i =>
-    i.tasks.forEach(t => total += t.mh)
-  );
-  state.totalMH = total;
-  document.getElementById("totalMH").innerText = total;
-}
-
-function updateTally() {
-  const ul = document.getElementById("tally");
-  ul.innerHTML = "";
-  state.inspections.forEach(i => {
-    const done = i.tasks.filter(t => t.done).length;
-    const total = i.tasks.length || 1;
-    const percent = Math.round((done / total) * 100);
-    const li = document.createElement("li");
-    li.innerText = `${i.name} – ${percent}%`;
-    ul.appendChild(li);
+function loadAircraft(list) {
+  const div = document.getElementById("aircraftInspections");
+  div.innerHTML = "";
+  list.forEach(i => {
+    const btn = document.createElement("button");
+    btn.innerText = i.name;
+    btn.onclick = () => window.open(i.pdf, "_blank");
+    div.appendChild(btn);
   });
 }
-  async function openInspectionPDF(inspectionKey) {
-  const res = await fetch("inspection_library.json");
-  const data = await res.json();
 
-  const insp = data.aircraft_inspections[inspectionKey];
-  if (!insp || !insp.pdf) {
-    alert("PDF not found");
-    return;
-  }
-
-  window.open(insp.pdf, "_blank");
+function loadEngine(list) {
+  const div = document.getElementById("engineInspections");
+  div.innerHTML = "";
+  list.forEach(i => {
+    const btn = document.createElement("button");
+    btn.innerText = i.name;
+    btn.onclick = () => window.open(i.pdf, "_blank");
+    div.appendChild(btn);
+  });
 }
 </script>
 
