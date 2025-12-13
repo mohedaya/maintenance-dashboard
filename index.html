@@ -68,4 +68,17 @@ function startPackage() {
 
   const aircraft = {
     reg: document.getElementById('reg').value,
-    tt: document.getElementById('tt
+    tt: document.getElementById('tt').value,
+    tc: document.getElementById('tc').value,
+    sn: document.getElementById('sn').value
+  };
+
+  localStorage.setItem('aircraftInfo', JSON.stringify(aircraft));
+  localStorage.setItem('selectedInspections', JSON.stringify(selected));
+
+  alert('Work Package Created');
+}
+</script>
+
+</body>
+</html>
