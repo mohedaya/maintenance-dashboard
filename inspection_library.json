@@ -1,48 +1,53 @@
 {
-  "meta": {
-    "aircraft_type": "AW139",
-    "description": "AW139 Inspection and Engine Task Library"
-  },
-
-  "aircraft_inspections": {
-    "50 HRS": {
+  "aircraft": "AW139",
+  "inspections": [
+    {
+      "name": "50 HRS",
       "pdf": "inspection-library/pdf/AW139_50_HOUR_CHECK.pdf"
     },
-    "100 HRS": {
+    {
+      "name": "100 HRS",
       "pdf": "inspection-library/pdf/AW139_100_HOUR_CHECK.pdf"
     },
-    "300 HRS": {
+    {
+      "name": "300 HRS",
       "pdf": "inspection-library/pdf/AW139_300_HOUR_CHECK.pdf"
     },
-    "600 HRS": {
+    {
+      "name": "600 HRS",
       "pdf": "inspection-library/pdf/AW139_600_HOUR_CHECK.pdf"
     },
-    "1200 HRS": {
+    {
+      "name": "1200 HRS",
       "pdf": "inspection-library/pdf/AW139_1200_HOUR_CHECK.pdf"
     },
-    "1 YEAR": {
+    {
+      "name": "1 YEAR",
       "pdf": "inspection-library/pdf/AW139_1_YEAR_CHECK.pdf"
     },
-    "2 YEAR": {
+    {
+      "name": "2 YEAR",
       "pdf": "inspection-library/pdf/AW139_2_YEAR_CHECK.pdf"
     },
-    "4 YEAR": {
+    {
+      "name": "4 YEAR",
       "pdf": "inspection-library/pdf/AW139_4_YEAR_CHECK.pdf"
-    }
-  },
-
-  "engine_tasks": {
-    "ENGINE 300 HRS FUEL NOZZLE CHANGE": {
+    },
+    {
+      "name": "ENGINE 300 HRS FUEL NOZZLE",
       "pdf": "inspection-library/pdf/Engine_300_HOUR_FUEL_NOZZLE_CHANGE.pdf"
     },
-    "ENGINE 600 HRS FUEL NOZZLE CHANGE": {
+    {
+      "name": "ENGINE 600 HRS FUEL NOZZLE",
       "pdf": "inspection-library/pdf/Engine_600_HOUR_FUEL_NOZZLE_CHANGE.pdf"
     },
-    "ENGINE 600 HRS CHECK": {
+    {
+      "name": "ENGINE 600 HRS",
       "pdf": "inspection-library/pdf/Engine_600_HOUR_CHECK.pdf"
     },
-    "ENGINE 900 HRS CHECK": {
+    {
+      "name": "ENGINE 900 HRS",
       "pdf": "inspection-library/pdf/Engine_900_HOUR_CHECK.pdf"
     }
-  }
+  ]
 }
