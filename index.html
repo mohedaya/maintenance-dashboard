@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
 <title>Helicopter Maintenance Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
@@ -15,23 +15,21 @@ header{background:#1e293b;color:#fff;padding:12px 16px;display:flex;justify-cont
 .card{background:#fff;padding:14px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:900px){.grid{grid-template-columns:1fr}}
-label{font-weight:bold;font-size:13px;margin-top:8px;display:block}
+label{font-weight:bold;font-size:13px;margin-top:6px;display:block}
 input,select,textarea{width:100%;padding:7px;margin-top:4px;border-radius:8px;border:1px solid #cbd5e1}
 button{padding:8px 12px;border-radius:8px;border:none;background:#2563eb;color:#fff;font-weight:bold;cursor:pointer}
 button:hover{background:#1d4ed8}
 table{width:100%;border-collapse:collapse;margin-top:8px}
-th,td{border:1px solid #cbd5e1;padding:6px;font-size:13px}
+th,td{border:1px solid #cbd5e1;padding:6px;font-size:12px}
 th{background:#e5e7eb}
-.status{padding:2px 8px;border-radius:999px;font-size:12px;font-weight:bold}
+.small{font-size:12px;color:#64748b}
+.click{cursor:pointer}
+.click:hover{background:#f1f5f9}
+.status{padding:2px 8px;border-radius:999px;font-size:11px;font-weight:bold}
 .req{background:#ffedd5;color:#9a3412}
 .iss{background:#dbeafe;color:#1e3a8a}
 .ins{background:#dcfce7;color:#166534}
 .aog{background:#fee2e2;color:#991b1b}
-.small{font-size:12px;color:#64748b}
-.click{cursor:pointer}
-.click:hover{background:#f1f5f9}
-.bar{height:8px;background:#e5e7eb;border-radius:999px;overflow:hidden}
-.bar div{height:100%;background:#2563eb}
 </style>
 </head>
 
@@ -87,7 +85,7 @@ th{background:#e5e7eb}
 
 <div class="grid" style="margin-top:16px">
 <div class="card">
-<h3>🧾 Summary Panel</h3>
+<h3>🧾 Summary</h3>
 <table>
 <thead><tr><th>Item</th><th>Progress</th></tr></thead>
 <tbody id="summary"></tbody>
@@ -96,11 +94,17 @@ th{background:#e5e7eb}
 
 <div class="card">
 <h3>📦 Parts & Consumables</h3>
+<button onclick="exportAOG()" style="margin-bottom:8px;background:#dc2626">
+Export AOG Report
+</button>
 <table>
 <thead>
 <tr>
-<th>From</th>
-<th>Part No</th>
+<th>Inspection</th>
+<th>Item #</th>
+<th>Section</th>
+<th>Task</th>
+<th>P/N</th>
 <th>Desc</th>
 <th>Qty</th>
 <th>Status</th>
@@ -119,8 +123,10 @@ th{background:#e5e7eb}
 </div>
 
 <script>
-let items=[],tasks=[],parts=[];
-const SECTIONS=["Fuselage","MR","TR","Engine","Avionics"];
+let items=[],tasks=[];
+let SECTIONS=["Fuselage","MR","TR","Engine","Avionics"];
+
+function uid(){return Math.random().toString(36).slice(2,9)}
 
 function start(){
 tbReg.textContent=reg.value;
@@ -128,20 +134,28 @@ tbSN.textContent=sn.value;
 tbTT.textContent=tt.value;
 tbTC.textContent=tc.value;
 
-items=[];tasks=[];parts=[];
+items=[];tasks=[];
+
 document.querySelectorAll(".cbAir:checked").forEach(c=>{
-let id="AIR_"+c.value;
-items.push({id,label:c.value});
-["Engine","Fuselage"].forEach(sec=>{
-let tid=Math.random();
-tasks.push({id:tid,parent:id,title:`${sec} check`,section:sec,done:false});
+let pid=uid();
+items.push({id:pid,label:c.value});
+["Fuselage","Engine"].forEach((sec,i)=>{
+tasks.push({
+id:uid(),
+parent:pid,
+inspection:c.value,
+itemNo:i+1,
+section:sec,
+title:`${sec} inspection task`,
+done:false,
+parts:[]
+});
 });
 });
 
 pageSetup.classList.add("hidden");
 pageMain.classList.remove("hidden");
 topBar.classList.remove("hidden");
-
 render();
 }
 
@@ -151,62 +165,81 @@ items.forEach(it=>{
 let st=tasks.filter(t=>t.parent===it.id);
 let d=st.filter(t=>t.done).length;
 let p=st.length?Math.round(d/st.length*100):0;
-summary.innerHTML+=`<tr class="click" onclick="openDetails('${it.id}')">
+summary.innerHTML+=`
+<tr class="click" onclick="openDetails('${it.id}')">
 <td><b>${it.label}</b></td>
-<td>${p}%<div class="bar"><div style="width:${p}%"></div></div></td>
+<td>${p}%</td>
 </tr>`;
 });
-renderProgress();
 renderParts();
+renderProg();
 }
 
 function openDetails(id){
 let html="";
 tasks.filter(t=>t.parent===id).forEach(t=>{
 html+=`
-<div class="card">
-<b>${t.title}</b>
-<label><input type="checkbox" onchange="t.done=this.checked;render()"> Done</label>
+<div class="card" style="margin-bottom:10px">
+<b>Item ${t.itemNo} – ${t.section}</b><br>
+${t.title}<br>
 
-<label>Needs Part?</label>
-<select onchange="addPart('${t.title}',this.value)">
-<option>NO</option>
-<option>YES</option>
+<label><input type="checkbox" ${t.done?"checked":""}
+onchange="t.done=this.checked;render()"> Task Done</label>
+
+<label>Add Part</label>
+<div class="grid">
+<input placeholder="P/N" id="pn_${t.id}">
+<input placeholder="Description" id="ds_${t.id}">
+<input type="number" placeholder="Qty" id="qt_${t.id}">
+<select id="st_${t.id}">
+<option>Requested</option>
+<option>Issued</option>
+<option>Installed</option>
+<option>AOG</option>
 </select>
+</div>
+<button onclick="addPart('${t.id}')">Add</button>
 </div>`;
 });
 details.innerHTML=html;
 }
 
-function addPart(from,val){
-if(val!=="YES")return;
-parts.push({
-from,part:"PN-XXXX",desc:"Sample part",qty:1,status:"Requested"
-});
-renderParts();
-saveHistory();
+function addPart(tid){
+let t=tasks.find(x=>x.id===tid);
+let p={
+pn:document.getElementById("pn_"+tid).value,
+desc:document.getElementById("ds_"+tid).value,
+qty:+document.getElementById("qt_"+tid).value||1,
+status:document.getElementById("st_"+tid).value
+};
+t.parts.push(p);
+render();
 }
 
 function renderParts(){
 partsTable.innerHTML="";
-parts.forEach(p=>{
+tasks.forEach(t=>{
+t.parts.forEach(p=>{
 partsTable.innerHTML+=`
 <tr>
-<td>${p.from}</td>
-<td>${p.part}</td>
+<td>${t.inspection}</td>
+<td>${t.itemNo}</td>
+<td>${t.section}</td>
+<td>${t.title}</td>
+<td>${p.pn}</td>
 <td>${p.desc}</td>
 <td>${p.qty}</td>
-<td class="status ${p.status==="Requested"?"req":""}">${p.status}</td>
+<td class="status ${p.status==="AOG"?"aog":""}">${p.status}</td>
 </tr>`;
+});
 });
 }
 
-function renderProgress(){
+function renderProg(){
 inspProg.innerHTML="";
 items.forEach(it=>{
 let st=tasks.filter(t=>t.parent===it.id);
-let d=st.filter(t=>t.done).length;
-inspProg.innerHTML+=`<p>${it.label}: ${d}/${st.length}</p>`;
+inspProg.innerHTML+=`<p>${it.label}: ${st.filter(t=>t.done).length}/${st.length}</p>`;
 });
 teamProg.innerHTML="";
 SECTIONS.forEach(s=>{
@@ -215,8 +248,22 @@ teamProg.innerHTML+=`<p>${s}: ${st.filter(t=>t.done).length}/${st.length}</p>`;
 });
 }
 
-function saveHistory(){
-localStorage.setItem("partsHistory",JSON.stringify(parts));
+function exportAOG(){
+let map={};
+tasks.forEach(t=>{
+t.parts.filter(p=>p.status==="AOG").forEach(p=>{
+map[p.pn]=(map[p.pn]||0)+p.qty;
+});
+});
+let csv="PN,Quantity\n";
+Object.keys(map).forEach(pn=>{
+csv+=`${pn},${map[pn]}\n`;
+});
+let blob=new Blob([csv],{type:"text/csv"});
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="AOG_Report.csv";
+a.click();
 }
 </script>
 
