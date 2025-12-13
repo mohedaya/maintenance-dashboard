@@ -2,94 +2,66 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>AW139 Maintenance Dashboard</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Helicopter Maintenance Dashboard</title>
 
 <style>
 body {
   font-family: Arial, sans-serif;
   background: #f4f6f8;
   margin: 0;
+}
+header {
+  background: #1f2937;
+  color: white;
+  padding: 15px;
+}
+.container {
   padding: 20px;
 }
-h1 {
-  margin-top: 0;
-}
 .card {
-  background: #ffffff;
+  background: white;
   padding: 15px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 button {
-  display: block;
-  width: 100%;
-  text-align: left;
-  padding: 10px;
-  margin-top: 6px;
-  border: 1px solid #ccc;
-  background: #eef2ff;
+  padding: 6px 12px;
   cursor: pointer;
-  border-radius: 4px;
-}
-button:hover {
-  background: #e0e7ff;
-}
-.small {
-  font-size: 12px;
-  color: #555;
 }
 </style>
 </head>
 
 <body>
 
-<h1>AW139 Maintenance Dashboard</h1>
+<header>
+  <h1>Helicopter Maintenance Dashboard</h1>
+</header>
 
-<div class="card">
-  <h2>Aircraft Inspections</h2>
-  <div id="aircraftInspections" class="small">Loading…</div>
-</div>
-
-<div class="card">
-  <h2>Engine Inspections</h2>
-  <div id="engineInspections" class="small">Loading…</div>
+<div class="container">
+  <h2>Inspection Library (AW139)</h2>
+  <div id="inspectionList"></div>
 </div>
 
 <script>
-fetch("inspection_library.json")
+fetch('inspection_library.json')
   .then(res => res.json())
   .then(data => {
-    loadAircraft(data.library.aircraft_inspections);
-    loadEngine(data.library.engine_inspections);
-  })
-  .catch(err => {
-    alert("Failed to load inspection library");
-    console.error(err);
-  });
+    const container = document.getElementById('inspectionList');
 
-function loadAircraft(list) {
-  const div = document.getElementById("aircraftInspections");
-  div.innerHTML = "";
-  list.forEach(i => {
-    const btn = document.createElement("button");
-    btn.innerText = i.name;
-    btn.onclick = () => window.open(i.pdf, "_blank");
-    div.appendChild(btn);
-  });
-}
+    data.inspections.forEach(ins => {
+      const div = document.createElement('div');
+      div.className = 'card';
 
-function loadEngine(list) {
-  const div = document.getElementById("engineInspections");
-  div.innerHTML = "";
-  list.forEach(i => {
-    const btn = document.createElement("button");
-    btn.innerText = i.name;
-    btn.onclick = () => window.open(i.pdf, "_blank");
-    div.appendChild(btn);
+      div.innerHTML = `
+        <strong>${ins.name}</strong><br><br>
+        <button onclick="window.open('${ins.pdf}', '_blank')">
+          Open PDF
+        </button>
+      `;
+
+      container.appendChild(div);
+    });
   });
-}
 </script>
 
 </body>
