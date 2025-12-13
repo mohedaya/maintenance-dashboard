@@ -10,54 +10,41 @@
 <style>
 body{margin:0;font-family:Arial;background:#f4f6f9}
 .hidden{display:none}
-header{background:#1e293b;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;flex-wrap:wrap}
+header{background:#1e293b;color:#fff;padding:12px 16px;display:flex;justify-content:space-between}
 .container{padding:16px}
 .card{background:#fff;padding:14px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:900px){.grid{grid-template-columns:1fr}}
 label{font-weight:bold;font-size:13px;margin-top:6px;display:block}
-input,select{width:100%;padding:6px;margin-top:4px;border-radius:8px;border:1px solid #cbd5e1}
+input{width:100%;padding:6px;margin-top:4px;border-radius:8px;border:1px solid #cbd5e1}
 button{padding:8px 12px;border-radius:8px;border:none;background:#2563eb;color:#fff;font-weight:bold;cursor:pointer}
-button:hover{background:#1d4ed8}
 table{width:100%;border-collapse:collapse;margin-top:8px}
 th,td{border:1px solid #cbd5e1;padding:6px;font-size:12px}
 th{background:#e5e7eb}
-.small{font-size:12px;color:#64748b}
-.bar{height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden}
-.bar div{height:100%;background:#2563eb}
-.over{background:#fee2e2!important}
-.ok{background:#dcfce7!important}
 </style>
 </head>
 
 <body>
 
 <header id="topBar" class="hidden">
-  <div><b id="tbReg">—</b> | S/N <span id="tbSN">—</span></div>
-  <div>TT <span id="tbTT">—</span> | TC <span id="tbTC">—</span></div>
+  <div><b id="tbReg"></b> | S/N <span id="tbSN"></span></div>
+  <div>Total MH: <b id="totalMH">0</b></div>
 </header>
 
 <!-- PAGE 1 -->
 <div id="pageSetup" class="container">
 <div class="card">
-<h2>📌 Data Entry & Planning</h2>
+<h2>📌 Data Entry</h2>
 
-<div class="grid">
-<div>
-<label>Aircraft Reg</label><input id="reg">
-<label>Serial No</label><input id="sn">
-<label>Total Time</label><input id="tt">
-<label>Total Cycles</label><input id="tc">
-</div>
+<label>Aircraft Registration</label><input id="reg">
+<label>Serial Number</label><input id="sn">
 
-<div>
-<label>Aircraft Inspections</label>
-<label><input type="checkbox" value="100 HRS" class="cbAir"> 100 HRS</label>
-<label><input type="checkbox" value="4 YEAR" class="cbAir"> 4 YEAR</label>
-</div>
-</div>
+<label>Inspection Package</label>
+<label><input type="checkbox" class="pkg" value="100 HRS"> 100 HRS</label>
+<label><input type="checkbox" class="pkg" value="4 YEAR"> 4 YEAR</label>
 
-<button onclick="start()">▶ Start Maintenance</button>
+<br>
+<button onclick="start()">▶ Start Work</button>
 </div>
 </div>
 
@@ -66,61 +53,45 @@ th{background:#e5e7eb}
 
 <div class="grid">
 <div class="card">
-<h3>📊 Inspection Progress</h3>
-<div id="inspProg"></div>
-</div>
-
-<div class="card">
-<h3>⏱ Man-Hours (Management)</h3>
-<div id="mhGauge"></div>
-</div>
-</div>
-
-<div class="grid" style="margin-top:16px">
-<div class="card">
-<h3>🧾 Summary</h3>
+<h3>⏱ Man-Hours Summary</h3>
 <table>
-<thead><tr><th>Inspection</th><th>Progress</th></tr></thead>
-<tbody id="summary"></tbody>
+<thead><tr><th>Inspection</th><th>Total MH</th></tr></thead>
+<tbody id="mhSummary"></tbody>
 </table>
 </div>
 
 <div class="card">
-<h3>🔍 Details (Tasks)</h3>
-<div id="details" class="small">Select inspection</div>
+<h3>🧾 Tasks</h3>
+<div id="taskList">Select inspection</div>
 </div>
 </div>
 
 </div>
 
 <script>
-let items=[],tasks=[];
-const SECTIONS=["Fuselage","MR","TR","Engine","Avionics"];
+let inspections=[],tasks=[];
 
 function uid(){return Math.random().toString(36).slice(2,9)}
 
 function start(){
 tbReg.textContent=reg.value;
 tbSN.textContent=sn.value;
-tbTT.textContent=tt.value;
-tbTC.textContent=tc.value;
 
-items=[];tasks=[];
+inspections=[];tasks=[];
 
-document.querySelectorAll(".cbAir:checked").forEach(c=>{
+document.querySelectorAll(".pkg:checked").forEach(p=>{
 let pid=uid();
-items.push({id:pid,label:c.value});
-["Fuselage","Engine","MR"].forEach((sec,i)=>{
+inspections.push({id:pid,label:p.value});
+["Fuselage","Engine","MR","TR","Avionics"].forEach((sec,i)=>{
 tasks.push({
 id:uid(),
 parent:pid,
-inspection:c.value,
-itemNo:i+1,
+inspection:p.value,
+item:i+1,
 section:sec,
-title:`${sec} inspection task`,
-done:false,
-plannedMH:2,
-actualMH:0
+title:`${sec} task`,
+mh:0,
+done:false
 });
 });
 });
@@ -132,69 +103,39 @@ render();
 }
 
 function render(){
-summary.innerHTML="";
-items.forEach(it=>{
-let st=tasks.filter(t=>t.parent===it.id);
-let done=st.filter(t=>t.done).length;
-let p=Math.round(done/st.length*100);
-summary.innerHTML+=`
-<tr onclick="openDetails('${it.id}')">
-<td><b>${it.label}</b></td>
-<td>${p}%<div class="bar"><div style="width:${p}%"></div></div></td>
+mhSummary.innerHTML="";
+let total=0;
+
+inspections.forEach(i=>{
+let sum=tasks.filter(t=>t.parent===i.id)
+.reduce((a,t)=>a+t.mh,0);
+total+=sum;
+mhSummary.innerHTML+=`
+<tr onclick="openTasks('${i.id}')">
+<td>${i.label}</td>
+<td>${sum.toFixed(1)}</td>
 </tr>`;
 });
-renderMH();
-renderInsp();
+
+totalMH.textContent=total.toFixed(1);
 }
 
-function openDetails(id){
+function openTasks(id){
 let html="";
 tasks.filter(t=>t.parent===id).forEach(t=>{
 html+=`
-<div class="card" style="margin-bottom:10px">
-<b>Item ${t.itemNo} – ${t.section}</b><br>
-${t.title}
-
-<label>Planned MH</label>
-<input type="number" value="${t.plannedMH}"
-onchange="t.plannedMH=+this.value;render()">
-
-<label>Actual MH</label>
-<input type="number" value="${t.actualMH}"
-onchange="t.actualMH=+this.value;render()">
-
+<div class="card" style="margin-bottom:8px">
+<b>${t.section}</b> – ${t.title}
+<label>Actual Man-Hours</label>
+<input type="number" value="${t.mh}"
+onchange="t.mh=+this.value;render()">
 <label>
 <input type="checkbox" ${t.done?"checked":""}
-onchange="t.done=this.checked;render()"> Task Done
+onchange="t.done=this.checked"> Task Done
 </label>
 </div>`;
 });
-details.innerHTML=html;
-}
-
-function renderMH(){
-let p=tasks.reduce((a,t)=>a+t.plannedMH,0);
-let a=tasks.reduce((a,t)=>a+t.actualMH,0);
-let d=a-p;
-
-mhGauge.innerHTML=`
-<p><b>Planned MH:</b> ${p.toFixed(1)}</p>
-<p><b>Actual MH:</b> ${a.toFixed(1)}</p>
-<p><b>Delta:</b> ${d>=0?"+":""}${d.toFixed(1)}</p>
-<div class="bar ${a>p?"over":"ok"}">
-<div style="width:${p?Math.min(a/p*100,100):0}%"></div>
-</div>`;
-}
-
-function renderInsp(){
-inspProg.innerHTML="";
-items.forEach(it=>{
-let st=tasks.filter(t=>t.parent===it.id);
-let pMH=st.reduce((a,t)=>a+t.plannedMH,0);
-let aMH=st.reduce((a,t)=>a+t.actualMH,0);
-inspProg.innerHTML+=`
-<p>${it.label} — Planned ${pMH} MH | Actual ${aMH} MH</p>`;
-});
+taskList.innerHTML=html;
 }
 </script>
 
