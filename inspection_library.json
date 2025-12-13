@@ -1,48 +1,43 @@
 {
-  "aircraft": "AW139",
-  "teams": ["FUSELAGE", "ENGINE", "MR", "TR", "AVIONICS"],
+  "aircraft_type": "AW139",
 
   "inspections": {
     "100 HRS": {
-      "tasks": [
-        {
-          "id": "100-FUS-01",
-          "section": "FUSELAGE",
-          "title": "General fuselage visual inspection",
-          "man_hours": 0,
-          "done": false,
-          "type": "ROUTINE"
-        },
-        {
-          "id": "100-ENG-01",
-          "section": "ENGINE",
-          "title": "Check engine oil leaks",
-          "man_hours": 0,
-          "done": false,
-          "type": "ROUTINE"
-        },
-        {
-          "id": "100-MR-01",
-          "section": "MR",
-          "title": "Inspect main rotor head",
-          "man_hours": 0,
-          "done": false,
-          "type": "ROUTINE"
-        }
-      ]
+      "sections": {
+        "FUSELAGE": [
+          {
+            "id": "100-FUS-01",
+            "title": "General fuselage visual inspection",
+            "routine": true
+          }
+        ],
+        "ENGINE": [
+          {
+            "id": "100-ENG-01",
+            "title": "Check engine oil leaks",
+            "routine": true
+          }
+        ],
+        "MAIN ROTOR": [
+          {
+            "id": "100-MR-01",
+            "title": "Inspect main rotor head",
+            "routine": true
+          }
+        ]
+      }
     },
 
     "ENGINE 600 HRS": {
-      "tasks": [
-        {
-          "id": "E600-01",
-          "section": "ENGINE",
-          "title": "600 HRS engine inspection",
-          "man_hours": 0,
-          "done": false,
-          "type": "ROUTINE"
-        }
-      ]
+      "sections": {
+        "ENGINE": [
+          {
+            "id": "E600-01",
+            "title": "600 HRS engine inspection",
+            "routine": true
+          }
+        ]
+      }
     }
   }
 }
