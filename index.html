@@ -4,110 +4,223 @@
 <meta charset="UTF-8">
 <title>Helicopter Maintenance Dashboard</title>
 <style>
-body{
+body {
   font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  margin:0;
-  padding:20px;
+  margin: 0;
+  background: #f4f6f8;
 }
-h2{margin-top:0}
-.card{
-  background:#fff;
-  padding:15px;
-  margin-bottom:15px;
-  border-radius:8px;
-  box-shadow:0 2px 6px rgba(0,0,0,.1);
+header {
+  background: #1f2937;
+  color: white;
+  padding: 15px;
 }
-.task{
-  border-bottom:1px solid #ddd;
-  padding:10px 0;
+h1 { margin: 0; font-size: 20px; }
+
+.container {
+  padding: 20px;
 }
-.task:last-child{border-bottom:none}
-label{font-weight:bold}
-input[type=number]{width:70px}
-.total{
-  font-size:18px;
-  font-weight:bold;
-  color:#0b7;
+.card {
+  background: white;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+}
+button {
+  padding: 6px 10px;
+  margin-top: 5px;
+  cursor: pointer;
+}
+input, select {
+  padding: 5px;
+  margin: 3px;
+}
+.hidden { display: none; }
+
+.inspection {
+  border: 1px solid #ccc;
+  margin-top: 10px;
+  border-radius: 4px;
+}
+.inspection-header {
+  background: #e5e7eb;
+  padding: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.task {
+  padding: 8px;
+  border-top: 1px solid #ddd;
+}
+.small {
+  font-size: 12px;
+  color: #555;
+}
+.total-box {
+  background: #ecfeff;
+  padding: 10px;
+  border-radius: 6px;
 }
 </style>
 </head>
 
 <body>
 
-<h2>Helicopter Maintenance Dashboard</h2>
+<header>
+  <h1>Helicopter Maintenance Dashboard</h1>
+</header>
 
-<!-- ================= MAN HOURS SUMMARY ================= -->
-<div class="card">
-  <h3>⏱ Man-Hours (Management)</h3>
-  <div>Total Actual MH: <span class="total" id="totalMH">0.0</span></div>
+<div class="container">
+
+<!-- PAGE 1 : DATA ENTRY -->
+<div class="card" id="pageSetup">
+  <h3>Aircraft Data Entry</h3>
+
+  <input id="reg" placeholder="A/C Registration">
+  <input id="tt" placeholder="TT">
+  <input id="tc" placeholder="TC">
+  <input id="sn" placeholder="S/N">
+
+  <h4>Select Required Inspections</h4>
+  <label><input type="checkbox" value="100 HRS"> 100 HRS</label><br>
+  <label><input type="checkbox" value="300 HRS"> 300 HRS</label><br>
+  <label><input type="checkbox" value="600 HRS"> 600 HRS</label><br>
+  <label><input type="checkbox" value="1 YEAR"> 1 YEAR</label><br>
+  <label><input type="checkbox" value="2 YEAR"> 2 YEAR</label><br>
+  <label><input type="checkbox" value="4 YEAR"> 4 YEAR</label>
+
+  <br><br>
+  <button onclick="startWork()">Start Work Package</button>
 </div>
 
-<!-- ================= TASK DETAILS ================= -->
-<div class="card">
-  <h3>📋 Tasks</h3>
-  <div id="taskList"></div>
+<!-- PAGE 2 : MAIN -->
+<div id="pageMain" class="hidden">
+
+  <!-- SUMMARY -->
+  <div class="card total-box">
+    <b>Total Actual Man-Hours:</b>
+    <span id="totalMH">0</span>
+  </div>
+
+  <!-- INSPECTIONS -->
+  <div class="card">
+    <h3>Inspections</h3>
+    <div id="inspectionList"></div>
+  </div>
+
+  <!-- TALLY SHEET -->
+  <div class="card">
+    <h3>Tally Sheet</h3>
+    <ul id="tally"></ul>
+  </div>
+
+</div>
+
 </div>
 
 <script>
-/* ===================== DATA ===================== */
+const state = {
+  inspections: [],
+  totalMH: 0
+};
 
-const tasks = [
-  { id:"T1", name:"Fuselage Inspection", section:"Fuselage", mh:0, done:false },
-  { id:"T2", name:"Engine Inspection", section:"Engine", mh:0, done:false },
-  { id:"T3", name:"Main Rotor Inspection", section:"MR", mh:0, done:false },
-  { id:"T4", name:"Tail Rotor Inspection", section:"TR", mh:0, done:false },
-  { id:"T5", name:"Avionics Check", section:"Avionics", mh:0, done:false }
-];
+function startWork() {
+  document.getElementById("pageSetup").classList.add("hidden");
+  document.getElementById("pageMain").classList.remove("hidden");
 
-/* ===================== FUNCTIONS ===================== */
-
-function updateMH(taskId, value){
-  const t = tasks.find(x => x.id === taskId);
-  if(t){
-    t.mh = Number(value) || 0;
-    render();
-  }
+  const checks = document.querySelectorAll('input[type=checkbox]:checked');
+  checks.forEach(c => createInspection(c.value));
+  updateTally();
 }
 
-function toggleDone(taskId, checked){
-  const t = tasks.find(x => x.id === taskId);
-  if(t){
-    t.done = checked;
-    render();
-  }
+function createInspection(name) {
+  const insp = {
+    name,
+    tasks: []
+  };
+  state.inspections.push(insp);
+
+  const box = document.createElement("div");
+  box.className = "inspection";
+
+  const header = document.createElement("div");
+  header.className = "inspection-header";
+  header.innerText = name + " (click to open)";
+  header.onclick = () => body.classList.toggle("hidden");
+
+  const body = document.createElement("div");
+  body.className = "hidden";
+
+  const addBtn = document.createElement("button");
+  addBtn.innerText = "Add Task";
+  addBtn.onclick = () => addTask(insp, body);
+
+  body.appendChild(addBtn);
+  box.appendChild(header);
+  box.appendChild(body);
+
+  document.getElementById("inspectionList").appendChild(box);
 }
 
-function render(){
-  // Render task list
-  let html = "";
-  tasks.forEach(t=>{
-    html += `
-      <div class="task">
-        <div><b>${t.name}</b> <small>(${t.section})</small></div>
-        <div>
-          Actual MH:
-          <input type="number" min="0" step="0.1"
-            value="${t.mh}"
-            onchange="updateMH('${t.id}', this.value)">
-          &nbsp;&nbsp;
-          Done:
-          <input type="checkbox"
-            ${t.done ? "checked" : ""}
-            onchange="toggleDone('${t.id}', this.checked)">
-        </div>
-      </div>
-    `;
+function addTask(insp, body) {
+  const task = {
+    mh: 0,
+    done: false
+  };
+  insp.tasks.push(task);
+
+  const div = document.createElement("div");
+  div.className = "task";
+
+  div.innerHTML = `
+    <input placeholder="Task name">
+    <select>
+      <option>Engine</option>
+      <option>MR</option>
+      <option>TR</option>
+      <option>Fuselage</option>
+      <option>Avionics</option>
+    </select>
+    MH: <input type="number" value="0" min="0" style="width:60px">
+    Done <input type="checkbox">
+  `;
+
+  const mhInput = div.querySelector('input[type=number]');
+  const doneBox = div.querySelector('input[type=checkbox]');
+
+  mhInput.oninput = () => {
+    task.mh = Number(mhInput.value);
+    recalcMH();
+  };
+
+  doneBox.onchange = () => {
+    task.done = doneBox.checked;
+    updateTally();
+  };
+
+  body.appendChild(div);
+}
+
+function recalcMH() {
+  let total = 0;
+  state.inspections.forEach(i =>
+    i.tasks.forEach(t => total += t.mh)
+  );
+  state.totalMH = total;
+  document.getElementById("totalMH").innerText = total;
+}
+
+function updateTally() {
+  const ul = document.getElementById("tally");
+  ul.innerHTML = "";
+  state.inspections.forEach(i => {
+    const done = i.tasks.filter(t => t.done).length;
+    const total = i.tasks.length || 1;
+    const percent = Math.round((done / total) * 100);
+    const li = document.createElement("li");
+    li.innerText = `${i.name} – ${percent}%`;
+    ul.appendChild(li);
   });
-  document.getElementById("taskList").innerHTML = html;
-
-  // Calculate total MH
-  const total = tasks.reduce((s,t)=>s+t.mh,0);
-  document.getElementById("totalMH").textContent = total.toFixed(1);
 }
-
-/* ===================== INIT ===================== */
-render();
 </script>
 
 </body>
